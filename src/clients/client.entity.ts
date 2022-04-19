@@ -14,7 +14,7 @@ export class Client {
   @Column()
   @IsEmail()
   email: string;
-  @ManyToOne((type) => User, (user) => user.clients, { eager: false })
+  @ManyToOne((type) => User, (user) => user.transactions, { eager: false })
   @Exclude({ toPlainOnly: true })
   user: User;
 }

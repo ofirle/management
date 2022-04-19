@@ -1,0 +1,18 @@
+export enum Type {
+  INCOME = 'INCOME',
+  EXPENSE = 'EXPENSE',
+}
+
+export enum Category {
+  RENT = 'RENT',
+  PROPERTY_TAX = 'PROPERTY_TAX',
+  HOUSE_COMMITTEE = 'HOUSE_COMMITTEE',
+  MEDICAL_INSURANCE = 'MEDICAL_INSURANCE',
+
+  ELECTRICITY = 'ELECTRICITY',
+}
+
+export enum ExpenseType {
+  INCIDENTAL = 'INCIDENTAL',
+  FIXED = 'FIXED',
+}

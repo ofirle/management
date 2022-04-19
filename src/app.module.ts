@@ -4,7 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 import { ClientsModule } from './clients/clients.module';
-import { SuppliersModule } from './suppliers/suppliers.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     }),
     ClientsModule,
     AuthModule,
-    SuppliersModule,
+    TransactionsModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
