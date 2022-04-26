@@ -1,17 +1,19 @@
 import {
   Body,
-  Controller, Get, Param,
+  Controller,
+  Get,
+  Param,
   Post,
   UploadedFile,
-  UseInterceptors
-} from "@nestjs/common";
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthCreateCredentialsDto } from './dto/auth-create-credentials.dto';
 import { AuthService } from './auth.service';
 import { AuthSigninCredentialsDto } from './dto/auth-signin-credentials.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { User } from "./user.entity";
+import { User } from './user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -48,9 +50,13 @@ export class AuthController {
     return this.authService.signIn(authSigninCredentialsDto);
   }
 
-  @Get('/:uid')
+  @Get('/users')
+  getUsers(): Promise<User[]> {
+    return this.authService.getUsers();
+  }
+
+  @Get('/users/:uid')
   getUser(@Param('uid') id: string): Promise<User> {
-    console.log(id);
     return this.authService.getUser(id);
   }
 }

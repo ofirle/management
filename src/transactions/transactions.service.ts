@@ -28,10 +28,10 @@ export class TransactionsService {
     return this.transactionRepository.getTransactions(filterDto, user);
   }
 
-  //
-  // async getSupplierType(id: string, user: User): Promise<SupplierType> {
-  //   return this.transactionTypeRepository.getSupplierType(id, user);
-  // }
+  async getTransaction(id: string, user: User): Promise<Transaction> {
+    return this.transactionRepository.getTransaction(id, user);
+  }
+
   //
   // async createSupplierType(
   //   createSupplierTypeDto: CreateSupplierTypeDto,

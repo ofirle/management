@@ -18,12 +18,16 @@ import { User } from '../auth/user.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from './transaction.entity';
 import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dto';
+import {
+  categoriesTitleMapping,
+  transactionsTypeTitleMapping,
+} from './category.mapping';
 import { UpdatePatchTransactionDto } from './dto/update-patch-transaction.dto';
 
 @Controller('transactions')
 @UseGuards(AuthGuard())
 export class TransactionsController {
-  private logger = new Logger('SuppliersController');
+  private logger = new Logger('TransactionController');
 
   constructor(private transactionsService: TransactionsService) {}
 
@@ -40,60 +44,40 @@ export class TransactionsController {
     return this.transactionsService.createTransaction(data, user);
   }
 
-  //
-  // @Get('/:id')
-  // getSupplier(
-  //   @GetUser() user: User,
-  //   @Param('id') id: string,
-  // ): Promise<Transaction> {
-  //   this.logger.verbose(
-  //     `User "${user.username}", retrieving supplier by id ${id}`,
-  //   );
-  //   return this.transactionsService.getSupplier(id, user);
-  // }
-  //
-  @Get()
-  @HttpCode(200)
-  getTransactions(
-    @Query() filterDto: GetTransactionsTypeFilter,
+  @Get('/:id')
+  getTransaction(
     @GetUser() user: User,
-  ): Promise<Transaction[]> {
+    @Param('id') id: string,
+  ): Promise<Transaction> {
     this.logger.verbose(
-      `User "${user.username}", retrieving all supplier types.
-       filters: ${JSON.stringify(filterDto)}`,
+      `User "${user.username}", retrieving transaction by id ${id}`,
     );
-    return this.transactionsService.getTransactions(filterDto, user);
+    return this.transactionsService.getTransaction(id, user);
   }
 
-  //
-  // @Get('/:id')
-  // getSupplierType(
-  //   @GetUser() user: User,
-  //   @Param('id') id: string,
-  // ): Promise<SupplierType> {
-  //   this.logger.verbose(
-  //     `User "${user.username}", retrieving supplier type.
-  //      id: ${id}`,
-  //   );
-  //   return this.transactionsService.getSupplierType(id, user);
-  // }
-  //
-  // @Post('/type')
-  // @HttpCode(201)
-  // createSupplierType(
-  //   @Body() createSupplierTypeDto: CreateSupplierTypeDto,
-  //   @GetUser() user: User,
-  // ): Promise<SupplierType> {
-  //   this.logger.verbose(
-  //     `User "${user.username}", create a new supplier type.
-  //      data: ${JSON.stringify(createSupplierTypeDto)}`,
-  //   );
-  //   return this.transactionsService.createSupplierType(
-  //     createSupplierTypeDto,
-  //     user,
-  //   );
-  // }
-  //
+  @Get()
+  @HttpCode(200)
+  async getTransactions(
+    @Query() filterDto: GetTransactionsTypeFilter,
+    @GetUser() user: User,
+  ): Promise<any> {
+    this.logger.verbose(
+      `User "${user.username}", retrieving all transactions.
+       filters: ${JSON.stringify(filterDto)}`,
+    );
+    const transactions = await this.transactionsService.getTransactions(
+      filterDto,
+      user,
+    );
+
+    return {
+      type: 1,
+      data: transactions,
+      categoryMapping: categoriesTitleMapping,
+      typeMapping: transactionsTypeTitleMapping,
+    };
+  }
+
   @Put('/:id')
   @HttpCode(204)
   updatePutTransaction(

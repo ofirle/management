@@ -33,14 +33,11 @@ export class TransactionRepository extends Repository<Transaction> {
 
     if (dateStart || dateEnd)
       findFilters['date'] = this.getQueryFilterRange(dateStart, dateEnd);
-    // if (dateRange) {
-    //   dateRange = JSON.parse(dateRange);
-    //   const { dateMin, dateMax } = dateRange;
-    //   if (dateMin && dateMax) findFilters['amount'] = Between(dateMin, dateMax);
-    //   else if (dateMin) findFilters['amount'] = MoreThanOrEqual(dateMin);
-    //   else findFilters['amount'] = LessThanOrEqual(dateMax);
-    // }
     return await this.find(findFilters);
+  }
+
+  async getTransaction(id, user: User): Promise<Transaction> {
+    return await this.findOne({ id, user });
   }
 
   getQueryFilterRange(dataMin, dataMax) {
