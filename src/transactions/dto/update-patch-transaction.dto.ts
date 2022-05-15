@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { Category, ExpenseType, Type } from './enums';
 import { ManyToOne } from 'typeorm';
-import { User } from '../../auth/user.entity';
+import { User } from '../../users/user.entity';
 import { Exclude } from 'class-transformer';
 
 export class UpdatePatchTransactionDto {

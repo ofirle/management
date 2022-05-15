@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransactionRepository } from './transaction.repository';
-import { User } from '../auth/user.entity';
+import { User } from '../users/user.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from './transaction.entity';
 import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dto';
-import { UpdatePatchTransactionDto } from './dto/update-patch-transaction.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -18,7 +17,11 @@ export class TransactionsService {
     data: CreateTransactionDto,
     user: User,
   ): Promise<Transaction> {
-    return this.transactionRepository.createTransaction(data, user);
+    try {
+      return this.transactionRepository.createTransaction(data, user);
+    } catch (err) {
+      throw err;
+    }
   }
 
   async getTransactions(
@@ -43,27 +46,27 @@ export class TransactionsService {
   //   );
   // }
   //
-  async updatePutTransaction(
-    id,
-    updateTransactionData: CreateTransactionDto,
-    user: User,
-  ): Promise<Transaction> {
-    return this.transactionRepository.updatePutTransaction(
-      id,
-      updateTransactionData,
-      user,
-    );
-  }
+  // async updatePutTransaction(
+  //   id,
+  //   updateTransactionData: CreateTransactionDto,
+  //   user: User,
+  // ): Promise<Transaction> {
+  //   return this.transactionRepository.updatePutTransaction(
+  //     id,
+  //     updateTransactionData,
+  //     user,
+  //   );
+  // }
 
-  async updatePatchTransaction(
-    id,
-    updatePatchTransactionData: UpdatePatchTransactionDto,
-    user: User,
-  ): Promise<Transaction> {
-    return this.transactionRepository.updatePatchTransaction(
-      id,
-      updatePatchTransactionData,
-      user,
-    );
-  }
+  // async updatePatchTransaction(
+  //   id,
+  //   updatePatchTransactionData: UpdatePatchTransactionDto,
+  //   user: User,
+  // ): Promise<Transaction> {
+  //   return this.transactionRepository.updatePatchTransaction(
+  //     id,
+  //     updatePatchTransactionData,
+  //     user,
+  //   );
+  // }
 }

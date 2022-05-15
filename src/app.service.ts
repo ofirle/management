@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersRepository } from './auth/users.repository';
-import { ClientsRepository } from './clients/clients.repository';
+import { UsersRepository } from './users/users.repository';
 import { TransactionRepository } from './transactions/transaction.repository';
+import { CategoriesRepository } from './categories/categories.repository';
+import { RulesRepository } from './rules/rules.repository';
 
 @Injectable()
 export class AppService {
@@ -11,7 +12,9 @@ export class AppService {
     private transactionRepository: TransactionRepository,
     @InjectRepository(UsersRepository)
     private userRepository: UsersRepository,
-    @InjectRepository(ClientsRepository)
-    private clientRepository: ClientsRepository,
+    @InjectRepository(CategoriesRepository)
+    private categoryRepository: CategoriesRepository,
+    @InjectRepository(RulesRepository)
+    private ruleRepository: RulesRepository,
   ) {}
 }

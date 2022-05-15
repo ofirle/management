@@ -1,30 +1,50 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Category, ExpenseType, Type } from './enums';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { Type } from './enums';
 import { ManyToOne } from 'typeorm';
-import { User } from '../../auth/user.entity';
+import { User } from '../../users/user.entity';
 import { Exclude } from 'class-transformer';
+import { Category } from '../../categories/categories.entity';
 
 export class CreateTransactionDto {
   @IsNotEmpty()
   @IsEnum(Type)
   type: Type;
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   amount: number;
   @IsNotEmpty()
   @IsString()
   date: string;
   @IsString()
+  @IsOptional()
   note: string;
-  @IsEnum(Category)
+  @IsOptional()
+  @IsBoolean()
+  paid: string;
+  @IsString()
+  @IsOptional()
+  actionKey;
+  @IsString()
   @IsNotEmpty()
-  category: Category;
+  description;
+  @IsString()
+  @IsNotEmpty()
+  certificationNumber;
+  @IsString()
+  @IsNotEmpty()
+  hash: string;
   @ManyToOne((type) => User, (user) => user.transactions, { eager: false })
   @Exclude({ toPlainOnly: true })
   user: User;
-  @IsNotEmpty()
-  @IsEnum(ExpenseType)
-  expense: ExpenseType;
-  @IsOptional()
-  paid: string;
+  @ManyToOne(() => Category, (category) => category.transactions, {
+    nullable: true,
+  })
+  category: Category;
 }

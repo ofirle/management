@@ -3,8 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
-import { ClientsModule } from './clients/clients.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { CategoriesModule } from './categories/categories.module';
+import { RulesModule } from './rules/rules.module';
+import { SourcesModule } from './sources/sources.module';
 
 @Module({
   imports: [
@@ -12,9 +14,11 @@ import { TransactionsModule } from './transactions/transactions.module';
       envFilePath: [`.env.stage.dev`],
       validationSchema: configValidationSchema,
     }),
-    ClientsModule,
     AuthModule,
     TransactionsModule,
+    CategoriesModule,
+    RulesModule,
+    SourcesModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

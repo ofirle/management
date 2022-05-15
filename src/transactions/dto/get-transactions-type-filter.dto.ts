@@ -1,6 +1,9 @@
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class GetTransactionsTypeFilter {
+  @IsString()
+  @IsOptional()
+  description: string;
   @IsString()
   @IsOptional()
   note: string;
@@ -10,12 +13,15 @@ export class GetTransactionsTypeFilter {
   @IsString()
   @IsOptional()
   amountMin: number;
-  @IsNumber()
+  @IsString()
   @IsOptional()
   amountMax: number;
   @IsArray()
   @IsOptional()
   types: string[];
+  @IsArray()
+  @IsOptional()
+  categoryIds: number[];
   @IsString()
   @IsOptional()
   dateStart: string;

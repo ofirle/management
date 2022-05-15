@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from '../auth/user.entity';
+import { User } from '../users/user.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity()

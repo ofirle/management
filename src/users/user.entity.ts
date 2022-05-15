@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Transaction } from '../transactions/transaction.entity';
+import { Source } from '../sources/sources.entity';
 
 @Entity()
 export class User {
@@ -21,8 +22,11 @@ export class User {
   @Column()
   image: string;
 
-  @OneToMany((type) => Transaction, (transactions) => transactions.user, {
+  @OneToMany(() => Transaction, (transactions) => transactions.user, {
     eager: true,
   })
   transactions: Transaction[];
+
+  @OneToMany(() => Source, (sources) => sources.user)
+  sources: Source[];
 }
