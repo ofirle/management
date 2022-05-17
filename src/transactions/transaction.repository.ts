@@ -67,16 +67,14 @@ export class TransactionRepository extends Repository<Transaction> {
     user: User,
   ): Promise<Transaction> {
     const paid = data.hasOwnProperty('paid') && data.paid === 'true';
+    const title = data.title ? data.title : data.description;
     const transaction = this.create({
       ...data,
+      title,
       paid,
       user,
     });
-    try {
-      await this.save(transaction);
-    } catch (err) {
-      throw err;
-    }
+    await this.save(transaction);
     return transaction;
   }
 

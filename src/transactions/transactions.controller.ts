@@ -20,68 +20,7 @@ import {
   categoriesTitleMapping,
   transactionsTypeTitleMapping,
 } from './category.mapping';
-import * as XLSX from 'xlsx';
-import { Type } from './dto/enums';
-import { Source } from '../sources/sources.entity';
-import { getManager } from 'typeorm';
-import { BankType, SourceType } from '../sources/dto/enums';
-
-const hashString = (string: string) => {
-  let hash = 0,
-    i,
-    chr;
-  if (string.length === 0) return hash;
-  for (i = 0; i < string.length; i++) {
-    chr = string.charCodeAt(i);
-    hash = (hash << 5) - hash + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
-const parseExcelBankOtsarAhayal = async (filename, user) => {
-  const excelData = XLSX.readFile(filename);
-  const worksheet = excelData.Sheets[excelData.SheetNames[0]];
-
-  let DataRowIndex = 3;
-  const data = [];
-  const source = await getManager().findOne(Source, {
-    type: SourceType.BANK,
-    typeKey: BankType.OTSAR_AHAYAL,
-  });
-  while (worksheet[`B${DataRowIndex}`]) {
-    const amount =
-      worksheet[`F${DataRowIndex}`].v === ' '
-        ? worksheet[`G${DataRowIndex}`].v
-        : worksheet[`F${DataRowIndex}`].v;
-    const initial = worksheet[`B${DataRowIndex}`].w.split(/\//);
-    const date = `${initial[1]}-${initial[0]}-${initial[2]}`;
-    const row = {
-      date,
-      actionKey: worksheet[`C${DataRowIndex}`].v,
-      description: worksheet[`D${DataRowIndex}`].v,
-      certificationNumber: worksheet[`E${DataRowIndex}`].v,
-      amount,
-      type:
-        worksheet[`F${DataRowIndex}`].v === ' ' ? Type.EXPENSE : Type.INCOME,
-      category: null,
-      note: null,
-      source,
-      user,
-    };
-    data.push({ ...row, hash: hashString(JSON.stringify(data)) });
-    DataRowIndex += 1;
-  }
-  return data;
-  //
-  // const id = worksheet[`B${index}`].v;
-  // //   const name = worksheet[`C${index}`].v;
-  // //   console.log({ id, name });
-  // // }
-  // return Object.keys(excelData.Sheets).map((name) => ({
-  //   name,
-  //   data: XLSX.utils.sheet_to_json(excelData.Sheets[name]),
-  // }));
-};
+import { LoadFileDto } from './dto/load-filte.dto';
 
 @Controller('transactions')
 @UseGuards(AuthGuard())
@@ -144,31 +83,16 @@ export class TransactionsController {
     // return response;
   }
 
-  @Get('/read_file')
-  async readFile(@GetUser() user: User): Promise<any> {
-    const data = await parseExcelBankOtsarAhayal(
-      'C:/Users/ofirl/Downloads/FibiSave1651621297096.xls',
+  @Post('/read_file')
+  async readFile(
+    @GetUser() user: User,
+    @Body() data: LoadFileDto,
+  ): Promise<any> {
+    return await this.transactionsService.insertTransactionsFromExcel(
+      data.source,
+      data.file_name,
       user,
     );
-
-    // console.log(data);
-    const promises = data.map(async (transaction) => {
-      await this.transactionsService.createTransaction(transaction, user);
-    });
-
-    const r = Promise.all(promises).then((values) => {
-      console.log(values);
-    });
-    console.log(r);
-
-    // Promise.all(promises).then((results) =>
-    //   results.forEach((result) => console.log(result)),
-    // );
-
-    return [];
-    // return this.createTransactions(data, user);
-
-    // console.log(data);
   }
 
   @Get('/:id')

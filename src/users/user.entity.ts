@@ -1,6 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Transaction } from '../transactions/transaction.entity';
 import { Source } from '../sources/sources.entity';
+import { Rule } from '../rules/rules.entity';
+import { Category } from '../categories/categories.entity';
 
 @Entity()
 export class User {
@@ -29,4 +31,10 @@ export class User {
 
   @OneToMany(() => Source, (sources) => sources.user)
   sources: Source[];
+
+  @OneToMany(() => Rule, (rules) => rules.user)
+  rules: Rule[];
+
+  @OneToMany(() => Category, (categories) => categories.user)
+  categories: Category[];
 }

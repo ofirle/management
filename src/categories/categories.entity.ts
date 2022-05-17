@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   Tree,
@@ -9,6 +10,7 @@ import {
 } from 'typeorm';
 import { Rule } from '../rules/rules.entity';
 import { Transaction } from '../transactions/transaction.entity';
+import { User } from '../users/user.entity';
 
 @Entity()
 @Tree('closure-table')
@@ -35,4 +37,7 @@ export class Category {
 
   @OneToMany(() => Transaction, (transaction) => transaction.category)
   transactions: Transaction[];
+
+  @ManyToOne(() => User, (user) => user.categories)
+  user: User;
 }

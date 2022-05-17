@@ -1,7 +1,8 @@
 import {
   IsArray,
+  IsDefined,
+  IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -9,6 +10,8 @@ import {
 import { StringRuleConditionDto } from './string-rule-condition.dto';
 import { NumberRuleConditionDto } from './number-rule-condition.dto';
 import { Type } from 'class-transformer';
+import { Type as TransactionType } from '../../transactions/dto/enums';
+import { setDataDto } from './set-data.dto';
 
 export class createRulesDto {
   @IsString()
@@ -25,9 +28,12 @@ export class createRulesDto {
   @Type(() => NumberRuleConditionDto)
   priceConditions: NumberRuleConditionDto[];
   @IsOptional()
+  @IsEnum(TransactionType)
+  transactionType?: TransactionType;
+  @IsOptional()
   @IsArray()
   sourceIds: number[];
-  @IsNotEmpty()
-  @IsNumber()
-  categoryId: number;
+  @IsDefined()
+  @ValidateNested()
+  setData: setDataDto;
 }

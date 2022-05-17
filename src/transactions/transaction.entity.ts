@@ -30,6 +30,8 @@ export class Transaction {
   paid: boolean;
   @Column()
   actionKey: string;
+  @Column({ nullable: true })
+  title: string;
   @Column()
   description: string;
   @Column()
@@ -37,6 +39,8 @@ export class Transaction {
   @Column()
   @Index({ unique: true })
   hash: string;
+  @Column({ default: false })
+  isArchived: boolean;
   @ManyToOne(() => Category, (category) => category.transactions, {
     nullable: true,
   })

@@ -24,27 +24,33 @@ export class CreateTransactionDto {
   date: string;
   @IsString()
   @IsOptional()
+  title: string;
+  @IsString()
+  @IsOptional()
   note: string;
   @IsOptional()
   @IsBoolean()
   paid: string;
   @IsString()
   @IsOptional()
-  actionKey;
+  actionKey: string;
   @IsString()
   @IsNotEmpty()
-  description;
+  description: string;
   @IsString()
   @IsNotEmpty()
-  certificationNumber;
+  certificationNumber: string;
   @IsString()
   @IsNotEmpty()
   hash: string;
-  @ManyToOne((type) => User, (user) => user.transactions, { eager: false })
+  @ManyToOne(() => User, (user) => user.transactions, { eager: false })
   @Exclude({ toPlainOnly: true })
   user: User;
   @ManyToOne(() => Category, (category) => category.transactions, {
     nullable: true,
   })
   category: Category;
+  @IsOptional()
+  @IsBoolean()
+  isArchive: boolean;
 }

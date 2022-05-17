@@ -5,6 +5,8 @@ import { createRulesDto } from './dto/create-rules.dto';
 import { Category } from '../categories/categories.entity';
 import { Transaction } from '../transactions/transaction.entity';
 import { StringComparisonFunctions } from './dto/enum';
+import { Source } from '../sources/sources.entity';
+import { hideUserData } from '../shared/setData';
 
 @EntityRepository(Rule)
 export class RulesRepository extends Repository<Rule> {
@@ -19,8 +21,17 @@ export class RulesRepository extends Repository<Rule> {
     };
     rule.title = data.title;
     rule.conditions = conditions;
-    rule.category = await getManager().findOne(Category, data.categoryId);
-    // if (data.titleConditions) {
+    if (data.sourceIds) {
+      rule.sources = await getManager().findByIds(Source, data.sourceIds);
+    }
+    rule.transactionType = data.transactionType ?? null;
+    rule.user = user;
+    const { categoryId, isArchived, title } = data.setData;
+    if (categoryId) {
+      rule.category = await getManager().findOne(Category, categoryId);
+    }
+    rule.setTitle = title;
+    rule.isArchived = isArchived;
     //   data.titleConditions.forEach((condition) => {
     //     const value = condition.value.toLowerCase();
     //     let queryCondition = '';
@@ -56,12 +67,15 @@ export class RulesRepository extends Repository<Rule> {
     //     conditions.title.push(queryCondition);
     //   });
     // }
-    return await this.save(rule);
-    // return rule;
+    // rule.return; // if (data.titleConditions) {
+    await this.save(rule);
+    rule.user = hideUserData(rule.user);
+    return rule;
   }
 
-  async runRules(user: User): Promise<any[]> {
+  async runRules(user: User): Promise<Transaction[]> {
     const rules = await this.find();
+    const updatedTransactions = [];
     for (const rule of rules) {
       const filters = [];
       rule.conditions.title.forEach((condition) => {
@@ -85,20 +99,30 @@ export class RulesRepository extends Repository<Rule> {
             );
         }
       });
+      if (rule.transactionType) {
+        filters['type'] = rule.transactionType;
+      }
+
       let transactions = await getManager().find(Transaction, {
         user,
         ...filters,
       });
       console.log(rule);
       transactions = transactions.map((transaction) => {
-        transaction.category = rule.category;
+        if (rule.category) {
+          transaction.category = rule.category;
+        }
+        if (rule.isArchived) {
+          transaction.isArchived = rule.isArchived;
+        }
+        if (rule.setTitle) {
+          transaction.title = rule.setTitle;
+        }
         return transaction;
       });
       await getManager().save(Transaction, transactions);
-      console.log(transactions);
+      updatedTransactions.push(...transactions);
     }
-    return [];
+    return updatedTransactions;
   }
-
-  // async getRule(id: number, user: User): Promise<Rule> {}
 }
