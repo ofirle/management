@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthSignupDto } from './dto/auth-signup.dto';
 import { AuthService } from './auth.service';
-import { AuthSigninDto } from './dto/auth-signin.dto';
+import { AuthSignInDto } from './dto/auth-sign-in.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -38,14 +38,14 @@ export class AuthController {
   signUp(
     @Body() authCreateCredentialsDto: AuthSignupDto,
     @UploadedFile() image,
-  ): Promise<{ uid: string }> {
+  ): Promise<{ id: number }> {
     authCreateCredentialsDto.image = image.filename;
     return this.authService.signUp(authCreateCredentialsDto);
   }
 
   @Post('/signin')
   signIn(
-    @Body() authSigninCredentialsDto: AuthSigninDto,
+    @Body() authSigninCredentialsDto: AuthSignInDto,
   ): Promise<{ accessToken: string }> {
     return this.authService.signIn(authSigninCredentialsDto);
   }
@@ -56,7 +56,7 @@ export class AuthController {
   }
 
   @Get('/users/:uid')
-  getUser(@Param('uid') id: string): Promise<User> {
+  getUser(@Param('uid') id: number): Promise<User> {
     return this.authService.getUser(id);
   }
 }

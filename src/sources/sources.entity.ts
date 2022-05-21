@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import { BankType } from './dto/enums';
 import { User } from '../users/user.entity';
 
 @Entity()
+@Index(['type', 'typeKey'], { unique: true })
 export class Source {
   @PrimaryGeneratedColumn()
   id: number;
@@ -24,5 +26,5 @@ export class Source {
   @OneToMany(() => Transaction, (transaction) => transaction.source)
   transactions: Transaction[];
   @ManyToOne(() => User, (user) => user.sources)
-  user: User;
+  user: User | number;
 }

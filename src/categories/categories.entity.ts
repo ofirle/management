@@ -30,7 +30,7 @@ export class Category {
   children: Category[];
 
   @TreeParent()
-  parent: Category;
+  parent: Category | number;
 
   @OneToMany(() => Rule, (rule) => rule.category)
   rules: Rule[];

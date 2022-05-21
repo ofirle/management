@@ -2,16 +2,12 @@ import { EntityRepository, getManager, Like, Repository } from 'typeorm';
 import { Rule } from './rules.entity';
 import { User } from '../users/user.entity';
 import { createRulesDto } from './dto/create-rules.dto';
-import { Category } from '../categories/categories.entity';
 import { Transaction } from '../transactions/transaction.entity';
 import { StringComparisonFunctions } from './dto/enum';
-import { Source } from '../sources/sources.entity';
-import { hideUserData } from '../shared/setData';
 
 @EntityRepository(Rule)
 export class RulesRepository extends Repository<Rule> {
   async createRule(data: createRulesDto, user: User): Promise<Rule> {
-    console.log(data);
     const rule = new Rule();
     if (!data.titleConditions && !data.priceConditions)
       throw new Error('no condition has been set');
@@ -22,13 +18,15 @@ export class RulesRepository extends Repository<Rule> {
     rule.title = data.title;
     rule.conditions = conditions;
     if (data.sourceIds) {
-      rule.sources = await getManager().findByIds(Source, data.sourceIds);
+      rule.sources = data.sourceIds;
+      // rule.sources = await getManager().findByIds(Source, data.sourceIds);
     }
     rule.transactionType = data.transactionType ?? null;
-    rule.user = user;
+    rule.user = user.id;
     const { categoryId, isArchived, title } = data.setData;
     if (categoryId) {
-      rule.category = await getManager().findOne(Category, categoryId);
+      rule.category = categoryId;
+      // rule.category = await getManager().findOne(Category, categoryId);
     }
     rule.setTitle = title;
     rule.isArchived = isArchived;
@@ -69,7 +67,6 @@ export class RulesRepository extends Repository<Rule> {
     // }
     // rule.return; // if (data.titleConditions) {
     await this.save(rule);
-    rule.user = hideUserData(rule.user);
     return rule;
   }
 
@@ -110,7 +107,7 @@ export class RulesRepository extends Repository<Rule> {
       console.log(rule);
       transactions = transactions.map((transaction) => {
         if (rule.category) {
-          transaction.category = rule.category;
+          transaction.category = rule.categoryId;
         }
         if (rule.isArchived) {
           transaction.isArchived = rule.isArchived;
@@ -120,7 +117,7 @@ export class RulesRepository extends Repository<Rule> {
         }
         return transaction;
       });
-      await getManager().save(Transaction, transactions);
+      // await getManager().save(Transaction, transactions);
       updatedTransactions.push(...transactions);
     }
     return updatedTransactions;

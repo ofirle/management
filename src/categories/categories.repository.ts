@@ -13,10 +13,7 @@ export class CategoriesRepository extends Repository<Category> {
     });
     try {
       if (data.parent) {
-        const parentCategory = await manager.findOne(Category, data.parent);
-        if (parentCategory) {
-          category.parent = parentCategory;
-        }
+        category.parent = data.parent;
       }
       await manager.save(category);
     } catch (err) {

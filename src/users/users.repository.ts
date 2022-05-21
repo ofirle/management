@@ -11,7 +11,7 @@ import * as bcrypt from 'bcrypt';
 export class UsersRepository extends Repository<User> {
   async createUser(
     authCreateCredentialsDto: AuthSignupDto,
-  ): Promise<{ uid: string }> {
+  ): Promise<{ id: number }> {
     const { username, password, email, name, image } = authCreateCredentialsDto;
     //hash
     const salt = await bcrypt.genSalt();
@@ -27,7 +27,7 @@ export class UsersRepository extends Repository<User> {
     try {
       const userCreated = await this.save(user);
       console.log(userCreated);
-      return { uid: userCreated.id };
+      return { id: userCreated.id };
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException('username or email already exist');

@@ -28,23 +28,21 @@ export class Transaction {
   note: string;
   @Column({ default: true })
   paid: boolean;
-  @Column()
-  actionKey: string;
   @Column({ nullable: true })
   title: string;
   @Column()
   description: string;
   @Column()
-  certificationNumber: string;
-  @Column()
   @Index({ unique: true })
   hash: string;
   @Column({ default: false })
   isArchived: boolean;
+  @Column({ type: 'json', nullable: true })
+  extraData: string;
   @ManyToOne(() => Category, (category) => category.transactions, {
     nullable: true,
   })
-  category: Category;
+  category: Category | number;
   @ManyToOne(() => Source, (source) => source.transactions, { eager: true })
   source: Source;
   @ManyToOne(() => User, (user) => user.transactions, { eager: false })

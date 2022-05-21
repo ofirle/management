@@ -22,7 +22,7 @@ export class SourcesController {
 
   @Post('')
   @HttpCode(201)
-  createSource(
+  async createSource(
     @Body() data: createSourceDto,
     @GetUser() user: User,
   ): Promise<Source> {
@@ -30,6 +30,12 @@ export class SourcesController {
       `User "${user.username}", create a new source. 
        data: ${JSON.stringify(data)}`,
     );
-    return this.sourceService.createSource(data, user);
+    try {
+      const source = await this.sourceService.createSource(data, user);
+      return source;
+    } catch (err) {
+      console.log(err.message);
+      return err.message;
+    }
   }
 }

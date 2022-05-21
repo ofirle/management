@@ -6,6 +6,7 @@ import {
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 import { Category } from '../categories/categories.entity';
 import { Type } from '../transactions/dto/enums';
@@ -27,15 +28,19 @@ export class Rule {
   @Column({ nullable: true })
   transactionType: Type;
   @ManyToOne(() => Category, (category) => category.rules, {
-    eager: true,
     nullable: true,
   })
-  category: Category;
+  category: Category | number;
+
+  @RelationId((rule: Rule) => rule.category) // you need to specify target relation
+  categoryId: number;
   @ManyToMany(() => Source)
   @JoinTable()
-  sources: Source[];
+  sources: Source[] | number[];
+  @RelationId((rule: Rule) => rule.category) // you need to specify target relation
+  sourcesIds: number[];
   @CreateDateColumn()
   createdAt: Date;
   @ManyToOne(() => User, (user) => user.rules)
-  user: User;
+  user: User | number;
 }
