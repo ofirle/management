@@ -12,19 +12,20 @@ export const GetUser = createParamDecorator(
     console.log(_data);
     console.log(user.role);
     if (!_data.actions) return user;
+    const actions = _data.actions;
     if (!user.role) {
-      throw new MethodNotAllowedException('you dont have the permission');
+      throw new MethodNotAllowedException(
+        'you dont have the permission. no role has been assigned to you',
+      );
     }
     const allowedActions = user.role.permissions.map(
       (permission) => permission.action,
     );
-    console.log(allowedActions);
-    console.log(_data.actions);
-    if (!allowedActions.includes(_data.actions)) {
+
+    if (!actions.every((v) => allowedActions.includes(v))) {
       throw new MethodNotAllowedException('you dont have the permission');
     }
-    console.log(_data);
-    console.log(user);
+
     return user;
   },
 );

@@ -112,7 +112,7 @@ export class TransactionsController {
   @HttpCode(200)
   async getTransactions(
     @Query() filterDto: GetTransactionsTypeFilter,
-    @GetUser({ actions: [ActionsEnum.CreateTransaction] }) user: User,
+    @GetUser({ actions: [ActionsEnum.ReadTransactions] }) user: User,
   ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", retrieving all transactions.
