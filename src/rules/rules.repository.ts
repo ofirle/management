@@ -4,17 +4,20 @@ import { User } from '../users/user.entity';
 import { createRulesDto } from './dto/create-rules.dto';
 import { Transaction } from '../transactions/transaction.entity';
 import { StringComparisonFunctions } from './dto/enum';
+import { BadRequestException } from '@nestjs/common';
 
 @EntityRepository(Rule)
 export class RulesRepository extends Repository<Rule> {
   async createRule(data: createRulesDto, user: User): Promise<Rule> {
     const rule = new Rule();
-    if (!data.titleConditions && !data.priceConditions)
-      throw new Error('no condition has been set');
+    if (!data.titleConditions && !data.priceConditions) {
+      throw new BadRequestException('no condition has been set');
+    }
     const conditions = {
       title: data.titleConditions || [],
       price: data.priceConditions || [],
     };
+    rule.account = user.account;
     rule.title = data.title;
     rule.conditions = conditions;
     if (data.sourceIds) {
@@ -71,7 +74,7 @@ export class RulesRepository extends Repository<Rule> {
   }
 
   async runRules(user: User): Promise<Transaction[]> {
-    const rules = await this.find();
+    const rules = await this.find({ account: user.account });
     const updatedTransactions = [];
     for (const rule of rules) {
       const filters = [];

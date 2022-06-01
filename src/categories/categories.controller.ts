@@ -45,4 +45,10 @@ export class CategoriesController {
     );
     return this.categoriesService.getCategory(Number(id), user);
   }
+
+  @Get('/')
+  getCategories(@GetUser() user: User): Promise<Category[]> {
+    this.logger.verbose(`User "${user.username}", retrieving categories`);
+    return this.categoriesService.getCategories(user);
+  }
 }

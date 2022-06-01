@@ -7,6 +7,9 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
 import { RulesModule } from './rules/rules.module';
 import { SourcesModule } from './sources/sources.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -15,10 +18,13 @@ import { SourcesModule } from './sources/sources.module';
       validationSchema: configValidationSchema,
     }),
     AuthModule,
+    PermissionsModule,
     TransactionsModule,
     CategoriesModule,
     RulesModule,
     SourcesModule,
+    AccountsModule,
+    RolesModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

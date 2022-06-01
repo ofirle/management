@@ -9,7 +9,7 @@ export class GetTransactionsTypeFilter {
   note: string;
   @IsString()
   @IsOptional()
-  user;
+  usersId: string[];
   @IsString()
   @IsOptional()
   amountMin: number;
@@ -21,7 +21,7 @@ export class GetTransactionsTypeFilter {
   types: string[];
   @IsArray()
   @IsOptional()
-  categoryIds: number[];
+  categories: number[];
   @IsString()
   @IsOptional()
   dateStart: string;

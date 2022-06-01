@@ -16,25 +16,27 @@ import { User } from '../users/user.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from './transaction.entity';
 import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dto';
-import {
-  categoriesTitleMapping,
-  transactionsTypeTitleMapping,
-} from './category.mapping';
+import { transactionsTypeTitleMapping } from './category.mapping';
 import { LoadFileDto } from './dto/load-filte.dto';
+import { CategoriesService } from '../categories/categories.service';
+import { ActionsEnum } from '../shared/enum';
 
 @Controller('transactions')
 @UseGuards(AuthGuard())
 export class TransactionsController {
   private logger = new Logger('TransactionController');
 
-  constructor(private transactionsService: TransactionsService) {}
+  constructor(
+    private transactionsService: TransactionsService,
+    private categoriesService: CategoriesService,
+  ) {}
 
   @Get('/initData')
-  getInitData(): any {
+  async getInitData(@GetUser() user: User): Promise<any> {
     this.logger.verbose(`getInitData`);
     return {
       type: 1,
-      categoryMapping: categoriesTitleMapping,
+      categories: await this.categoriesService.getCategories(user),
       typeMapping: transactionsTypeTitleMapping,
     };
   }
@@ -97,7 +99,7 @@ export class TransactionsController {
 
   @Get('/:id')
   getTransaction(
-    @GetUser() user: User,
+    @GetUser({ actions: [ActionsEnum.ReadTransactions] }) user: User,
     @Param('id') id: string,
   ): Promise<Transaction> {
     this.logger.verbose(
@@ -110,7 +112,7 @@ export class TransactionsController {
   @HttpCode(200)
   async getTransactions(
     @Query() filterDto: GetTransactionsTypeFilter,
-    @GetUser() user: User,
+    @GetUser({ actions: [ActionsEnum.CreateTransaction] }) user: User,
   ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", retrieving all transactions.

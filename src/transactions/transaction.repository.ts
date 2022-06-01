@@ -25,12 +25,17 @@ export class TransactionRepository extends Repository<Transaction> {
       amountMin,
       amountMax,
       note,
-      categoryIds,
+      categories,
       description,
+      usersId,
     } = filters;
     const findFilters = {};
+    findFilters['account'] = Like(`${user.accountId}`);
+    if (usersId) {
+      findFilters['user'] = In(usersId);
+    }
     if (description) {
-      findFilters['note'] = Like(`%${note}%`);
+      findFilters['description'] = Like(`%${description}%`);
     }
     if (note) {
       findFilters['note'] = Like(`%${note}%`);
@@ -41,13 +46,13 @@ export class TransactionRepository extends Repository<Transaction> {
     if (types) {
       findFilters['type'] = In(types);
     }
-    if (categoryIds) {
-      findFilters['category'] = In(categoryIds);
+    if (categories) {
+      console.log(categories);
+      findFilters['category'] = In(categories);
     }
 
     if (dateStart || dateEnd)
       findFilters['date'] = this.getQueryFilterRange(dateStart, dateEnd);
-    console.log(findFilters);
     return await this.find(findFilters);
   }
 
@@ -73,6 +78,7 @@ export class TransactionRepository extends Repository<Transaction> {
       title,
       paid,
       user,
+      account: user.accountId,
     });
     await this.save(transaction);
     return transaction;

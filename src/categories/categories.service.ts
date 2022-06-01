@@ -19,4 +19,8 @@ export class CategoriesService {
   async getCategory(id: number, user: User): Promise<Category> {
     return this.categoriesRepository.getCategory(id, user);
   }
+
+  async getCategories(user: User): Promise<Category[]> {
+    return this.categoriesRepository.getCategories(user);
+  }
 }

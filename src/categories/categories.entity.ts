@@ -11,6 +11,7 @@ import {
 import { Rule } from '../rules/rules.entity';
 import { Transaction } from '../transactions/transaction.entity';
 import { User } from '../users/user.entity';
+import { Account } from '../accounts/accounts.entity';
 
 @Entity()
 @Tree('closure-table')
@@ -20,6 +21,9 @@ export class Category {
 
   @Column()
   title: string;
+
+  @Column({ nullable: true })
+  value: number;
 
   @Column({
     nullable: true,
@@ -32,6 +36,9 @@ export class Category {
   @TreeParent()
   parent: Category | number;
 
+  @Column({ nullable: true })
+  iconUrl: string;
+
   @OneToMany(() => Rule, (rule) => rule.category)
   rules: Rule[];
 
@@ -40,4 +47,9 @@ export class Category {
 
   @ManyToOne(() => User, (user) => user.categories)
   user: User;
+
+  @ManyToOne(() => Account, (account) => account.categories, {
+    nullable: true,
+  })
+  account: Account | number;
 }

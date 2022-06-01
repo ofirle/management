@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersRepository } from '../users/users.repository';
 import { AuthSignupDto } from './dto/auth-signup.dto';
 import { AuthSignInDto } from './dto/auth-sign-in.dto';
@@ -6,12 +10,16 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { User } from '../users/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { RolesRepository } from '../roles/roles.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersRepository: UsersRepository,
     private jwtService: JwtService,
+    @InjectRepository(RolesRepository)
+    private rolesRepository: RolesRepository,
   ) {}
 
   async signUp(authCredentialsDto: AuthSignupDto): Promise<{ id: number }> {
@@ -40,6 +48,21 @@ export class AuthService {
   async getUser(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({ id });
     console.log('user' + JSON.stringify(user));
+    return user;
+  }
+
+  async attachRole(userId: number, roleId: number): Promise<User> {
+    const user = await this.usersRepository.findOne({ id: userId });
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+    const role = await this.rolesRepository.findOne({ id: roleId });
+    if (!role) {
+      throw new NotFoundException('role not found');
+    }
+    console.log(role);
+    user.role = role;
+    await this.usersRepository.save(user);
     return user;
   }
 }

@@ -28,7 +28,8 @@ export class RulesController {
     @GetUser() user: User,
   ): Promise<Rule> {
     this.logger.verbose(
-      `User "${user.username}", create a new Rule. 
+      `User "${user.username}", create a new Rule.
+      account: ${user.accountId}
        data: ${JSON.stringify(data)}`,
     );
     return this.RuleService.createRule(data, user);
@@ -36,7 +37,9 @@ export class RulesController {
 
   @Post('/run')
   getRule(@GetUser() user: User): Promise<Transaction[]> {
-    this.logger.verbose(`User "${user.username}", run all rules`);
+    this.logger.verbose(
+      `User "${user.username}", run all rules from account ${user.accountId}`,
+    );
     return this.RuleService.runRules(user);
   }
 

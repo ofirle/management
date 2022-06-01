@@ -59,4 +59,12 @@ export class AuthController {
   getUser(@Param('uid') id: number): Promise<User> {
     return this.authService.getUser(id);
   }
+
+  @Post('/users/:uid/roles/:rid')
+  attachRole(
+    @Param('uid') userId: number,
+    @Param('rid') roleId: number,
+  ): Promise<User> {
+    return this.authService.attachRole(userId, roleId);
+  }
 }

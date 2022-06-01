@@ -8,14 +8,6 @@ export enum Language {
   HE = 'HE',
 }
 
-export enum MainCategory {
-  NECESSARY_FIXED = 'NECESSARY_FIXED',
-  NECESSARY_CHANGED = 'NECESSARY_CHANGED',
-  LUXURY_FIXED = 'LUXURY_FIXED',
-  LUXURY_CHANGED = 'LUXURY_CHANGED',
-  SAVING = 'SAVING',
-}
-
 export enum Category {
   SALARY = 'SALARY',
   APARTMENT_RENT = 'APARTMENT_RENT',

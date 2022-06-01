@@ -10,12 +10,15 @@ import { getManager } from 'typeorm';
 import { Source } from '../sources/sources.entity';
 import { BankType, CreditCardType, SourceType } from '../sources/dto/enums';
 import { Type } from './dto/enums';
+import { CategoriesRepository } from '../categories/categories.repository';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     @InjectRepository(TransactionRepository)
-    private transactionRepository: TransactionRepository, // @InjectRepository(TransactionTypeRepository) // private transactionTypeRepository: TransactionTypeRepository,
+    private transactionRepository: TransactionRepository,
+    @InjectRepository(CategoriesRepository)
+    private categoryRepository: CategoriesRepository,
   ) {}
 
   createTransaction(
@@ -68,6 +71,12 @@ export class TransactionsService {
     filterDto: GetTransactionsTypeFilter,
     user: User,
   ): Promise<Transaction[]> {
+    if (filterDto.categories) {
+      filterDto.categories =
+        await this.categoryRepository.getFlatDescendantsIds(
+          filterDto.categories,
+        );
+    }
     return this.transactionRepository.getTransactions(filterDto, user);
   }
 
