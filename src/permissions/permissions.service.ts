@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PermissionsRepository } from './permissions.repository';
 import { Permission } from './permissions.entity';
-import { createPermissionDto } from './dto/create-permission.dto';
+import { createPermissionsDto } from './dto/create-permissions.dto';
 
 @Injectable()
 export class PermissionsService {
@@ -11,7 +11,11 @@ export class PermissionsService {
     private permissionsRepository: PermissionsRepository,
   ) {}
 
-  async createPermission(data: createPermissionDto): Promise<Permission> {
-    return this.permissionsRepository.createPermission(data);
+  async createPermissions(data: createPermissionsDto): Promise<Permission[]> {
+    return this.permissionsRepository.createPermissions(data);
+  }
+
+  async getPermissions(): Promise<Permission[]> {
+    return this.permissionsRepository.getPermissions();
   }
 }

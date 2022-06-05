@@ -5,11 +5,11 @@ import {
   IsNumber,
   IsOptional,
 } from 'class-validator';
-import { NumberComparisonFunctions, StringComparisonFunctions } from './enum';
+import { NumberComparisonFunctions } from './enum';
 
 export class NumberRuleConditionDto {
   @IsNotEmpty()
-  @IsEnum(StringComparisonFunctions)
+  @IsEnum(NumberComparisonFunctions)
   comparisonFunction: NumberComparisonFunctions;
   @IsNotEmpty()
   @IsNumber()

@@ -21,7 +21,7 @@ export class RulesService {
     return this.RuleRepository.runRules(user);
   }
 
-  // async getRule(id: number, user: User): Promise<Rule> {
-  //   return this.RuleRepository.getRule(id, user);
-  // }
+  async getRules(user: User): Promise<Rule[]> {
+    return this.RuleRepository.getRules(user);
+  }
 }

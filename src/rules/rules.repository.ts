@@ -73,8 +73,15 @@ export class RulesRepository extends Repository<Rule> {
     return rule;
   }
 
+  async getRules(user: User): Promise<Rule[]> {
+    console.log(user);
+    console.log(user.account);
+    const rules = await this.find({ account: user.accountId });
+    return rules;
+  }
+
   async runRules(user: User): Promise<Transaction[]> {
-    const rules = await this.find({ account: user.account });
+    const rules = await this.find({ account: user.accountId });
     const updatedTransactions = [];
     for (const rule of rules) {
       const filters = [];

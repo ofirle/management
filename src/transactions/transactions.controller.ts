@@ -19,7 +19,7 @@ import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dt
 import { transactionsTypeTitleMapping } from './category.mapping';
 import { LoadFileDto } from './dto/load-filte.dto';
 import { CategoriesService } from '../categories/categories.service';
-import { ActionsEnum } from '../shared/enum';
+import { UsersRepository } from '../users/users.repository';
 
 @Controller('transactions')
 @UseGuards(AuthGuard())
@@ -29,14 +29,28 @@ export class TransactionsController {
   constructor(
     private transactionsService: TransactionsService,
     private categoriesService: CategoriesService,
+    private userRepository: UsersRepository,
   ) {}
 
   @Get('/initData')
   async getInitData(@GetUser() user: User): Promise<any> {
     this.logger.verbose(`getInitData`);
+    const users = await this.userRepository.find({ account: user.accountId });
+    const usersData = users.map((userLocal) => {
+      const userData = {
+        id: userLocal.id,
+        name: userLocal.name,
+      };
+      if (userLocal.id === user.id) {
+        userData.name = 'Me';
+      }
+
+      return userData;
+    });
     return {
       type: 1,
       categories: await this.categoriesService.getCategories(user),
+      users: usersData,
       typeMapping: transactionsTypeTitleMapping,
     };
   }
@@ -99,7 +113,7 @@ export class TransactionsController {
 
   @Get('/:id')
   getTransaction(
-    @GetUser({ actions: [ActionsEnum.ReadTransactions] }) user: User,
+    @GetUser() user: User,
     @Param('id') id: string,
   ): Promise<Transaction> {
     this.logger.verbose(
@@ -112,7 +126,7 @@ export class TransactionsController {
   @HttpCode(200)
   async getTransactions(
     @Query() filterDto: GetTransactionsTypeFilter,
-    @GetUser({ actions: [ActionsEnum.ReadTransactions] }) user: User,
+    @GetUser() user: User,
   ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", retrieving all transactions.

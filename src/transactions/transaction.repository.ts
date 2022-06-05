@@ -1,6 +1,7 @@
 import {
   Between,
   EntityRepository,
+  Equal,
   In,
   LessThanOrEqual,
   Like,
@@ -30,7 +31,7 @@ export class TransactionRepository extends Repository<Transaction> {
       usersId,
     } = filters;
     const findFilters = {};
-    findFilters['account'] = Like(`${user.accountId}`);
+    findFilters['account'] = Equal(user.accountId);
     if (usersId) {
       findFilters['user'] = In(usersId);
     }
@@ -53,6 +54,7 @@ export class TransactionRepository extends Repository<Transaction> {
 
     if (dateStart || dateEnd)
       findFilters['date'] = this.getQueryFilterRange(dateStart, dateEnd);
+    console.log(findFilters);
     return await this.find(findFilters);
   }
 

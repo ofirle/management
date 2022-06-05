@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Logger,
   Post,
@@ -36,11 +37,19 @@ export class RulesController {
   }
 
   @Post('/run')
-  getRule(@GetUser() user: User): Promise<Transaction[]> {
+  runRules(@GetUser() user: User): Promise<Transaction[]> {
     this.logger.verbose(
       `User "${user.username}", run all rules from account ${user.accountId}`,
     );
     return this.RuleService.runRules(user);
+  }
+
+  @Get('')
+  getRules(@GetUser() user: User): Promise<Rule[]> {
+    this.logger.verbose(
+      `User "${user.username}", retrieve all rules from account ${user.accountId}`,
+    );
+    return this.RuleService.getRules(user);
   }
 
   // @Get('/:id')

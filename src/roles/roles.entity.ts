@@ -17,7 +17,7 @@ export class Role {
   title: string;
   @ManyToMany(() => Permission, { eager: true })
   @JoinTable()
-  permissions: Permission[] | number[];
+  permissions: Permission[];
   @OneToMany(() => User, (user) => user.role)
   user: User;
 }

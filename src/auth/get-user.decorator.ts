@@ -9,9 +9,7 @@ export const GetUser = createParamDecorator(
   (_data, ctx: ExecutionContext): User => {
     const req = ctx.switchToHttp().getRequest();
     const user = req.user;
-    console.log(_data);
-    console.log(user.role);
-    if (!_data.actions) return user;
+    if (!_data?.actions) return user;
     const actions = _data.actions;
     if (!user.role) {
       throw new MethodNotAllowedException(

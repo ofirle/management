@@ -41,8 +41,12 @@ export class AuthService {
     }
   }
 
-  async getUsers(): Promise<User[]> {
-    return await this.usersRepository.find();
+  async getUsers(accountId: number = undefined): Promise<User[]> {
+    const filter = {};
+    if (accountId) {
+      filter['accountId'] = accountId;
+    }
+    return await this.usersRepository.find(filter);
   }
 
   async getUser(id: number): Promise<User> {

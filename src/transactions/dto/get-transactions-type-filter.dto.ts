@@ -7,7 +7,7 @@ export class GetTransactionsTypeFilter {
   @IsString()
   @IsOptional()
   note: string;
-  @IsString()
+  @IsArray()
   @IsOptional()
   usersId: string[];
   @IsString()
