@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Logger,
   Param,
   Post,
@@ -12,8 +14,8 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
 import { AccountsService } from './accounts.service';
 import { createAccountDto } from './dto/create-account.dto';
-import { Account } from './accounts.entity';
 import { attachAccountDto } from './dto/attach-account.dto';
+import { ActionsEnum } from '../shared/enum';
 
 @Controller('accounts')
 @UseGuards(AuthGuard())
@@ -26,18 +28,21 @@ export class AccountsController {
   @HttpCode(201)
   async createAccount(
     @Body() data: createAccountDto,
-    @GetUser() user: User,
-  ): Promise<Account> {
+    @GetUser({ actions: ActionsEnum.CreateAccount }) user: User,
+  ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", create a new account. 
        data: ${JSON.stringify(data)}`,
     );
     try {
       const account = await this.accountService.createAccount(data, user);
-      return account;
+      return {
+        data: account,
+      };
     } catch (err) {
-      console.log(err.message);
-      return err.message;
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -46,17 +51,21 @@ export class AccountsController {
   async attachUser(
     @Param('id') id: number,
     @Body() data: attachAccountDto,
-    @GetUser() user: User,
-  ): Promise<Account> {
+    @GetUser({ actions: ActionsEnum.AttachAccountUser }) user: User,
+  ): Promise<any> {
     this.logger.verbose(
-      `User "${user.username}", attach to account: ${id}
+      `User "${user.username}", attach user to account: ${id}
        data: ${JSON.stringify(data)}`,
     );
     try {
-      return await this.accountService.attachUser(id, data, user);
+      const account = await this.accountService.attachUser(id, data, user);
+      return {
+        data: account,
+      };
     } catch (err) {
-      console.log(err.message);
-      return err.message;
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

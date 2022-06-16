@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
@@ -10,6 +10,8 @@ import { SourcesModule } from './sources/sources.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RolesModule } from './roles/roles.module';
+import { typeOrmAsyncConfig } from './config/typeorm.config';
+import { SeedsModule } from './seeds/seeds.module';
 
 @Module({
   imports: [
@@ -25,22 +27,8 @@ import { RolesModule } from './roles/roles.module';
     SourcesModule,
     AccountsModule,
     RolesModule,
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        return {
-          type: 'postgres',
-          autoLoadEntities: true,
-          synchronize: true,
-          host: configService.get('DB_HOST'),
-          port: configService.get('DB_PORT'),
-          username: configService.get('DB_USERNAME'),
-          password: configService.get('DB_PASSWORD'),
-          database: configService.get('DB_DATABASE'),
-        };
-      },
-    }),
+    SeedsModule,
+    TypeOrmModule.forRootAsync(typeOrmAsyncConfig),
   ],
 })
 export class AppModule {}

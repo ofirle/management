@@ -22,8 +22,8 @@ export class Category {
   @Column()
   title: string;
 
-  @Column({ nullable: true })
-  value: number;
+  // @Column({ nullable: true })
+  // value: number;
 
   @Column({
     nullable: true,
@@ -45,7 +45,9 @@ export class Category {
   @OneToMany(() => Transaction, (transaction) => transaction.category)
   transactions: Transaction[];
 
-  @ManyToOne(() => User, (user) => user.categories)
+  @ManyToOne(() => User, (user) => user.categories, {
+    nullable: true,
+  })
   user: User;
 
   @ManyToOne(() => Account, (account) => account.categories, {

@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Logger,
   Post,
   UseGuards,
@@ -11,7 +13,7 @@ import { SourcesService } from './sources.service';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
 import { createSourceDto } from './dto/create-source.dto';
-import { Source } from './sources.entity';
+import { ActionsEnum } from '../shared/enum';
 
 @Controller('sources')
 @UseGuards(AuthGuard())
@@ -24,18 +26,21 @@ export class SourcesController {
   @HttpCode(201)
   async createSource(
     @Body() data: createSourceDto,
-    @GetUser() user: User,
-  ): Promise<Source> {
+    @GetUser({ actions: ActionsEnum.CreateSource }) user: User,
+  ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", create a new source. 
        data: ${JSON.stringify(data)}`,
     );
     try {
       const source = await this.sourceService.createSource(data, user);
-      return source;
+      return {
+        data: source,
+      };
     } catch (err) {
-      console.log(err.message);
-      return err.message;
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

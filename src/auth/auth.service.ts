@@ -51,7 +51,9 @@ export class AuthService {
 
   async getUser(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({ id });
-    console.log('user' + JSON.stringify(user));
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
     return user;
   }
 
@@ -64,7 +66,6 @@ export class AuthService {
     if (!role) {
       throw new NotFoundException('role not found');
     }
-    console.log(role);
     user.role = role;
     await this.usersRepository.save(user);
     return user;

@@ -1,7 +1,29 @@
 export enum ActionsEnum {
-  ReadTransactions = 'READ_TRANSACTIONS',
-  ImportTransactions = 'IMPORT_TRANSACTIONS',
-  CreateTransaction = 'CREATE_TRANSACTION',
+  //accounts
+  CreateAccount = 'CREATE_ACCOUNT',
+  AttachAccountUser = 'ATTACH_ACCOUNT_USER',
+  //categories
+  CreateCategory = 'CREATE_CATEGORY',
+  ReadCategory = 'READ_CATEGORY',
+  ReadCategories = 'READ_CATEGORIES',
+  //permissions
+  CreatePermission = 'CREATE_PERMISSION',
+  ReadPermissions = 'READ_PERMISSION',
+  //roles
   CreateRole = 'CREATE_ROLE',
-  AddPermission = 'ADD_PERMISSION',
+  ReadRoles = 'READ_ROLES',
+  UpdateRolePermission = 'UPDATE_ROLE_PERMISSION',
+  UpdateRole = 'UPDATE_ROLE',
+  DeleteRole = 'DELETE_ROLE',
+  //sources
+  CreateSource = 'CREATE_SOURCE',
+  //transactions
+  ReadTransactions = 'READ_TRANSACTIONS',
+  ReadTransaction = 'READ_TRANSACTION',
+  CreateTransaction = 'CREATE_TRANSACTION',
+  ImportTransactions = 'IMPORT_TRANSACTIONS',
+  //users
+  ReadUser = 'READ_USER',
+  ReadUsers = 'READ_USERS',
+  AttachUserRole = 'ATTACH_USER_ROLE',
 }

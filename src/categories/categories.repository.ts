@@ -67,7 +67,7 @@ export class CategoriesRepository extends Repository<Category> {
 
   parseCategoriesRec = (trees: Category[]) => {
     trees.forEach((node: Category) => {
-      node.value = node.id;
+      // node.value = node.id;
       if (node.children.length === 0) return;
       this.parseCategoriesRec(node.children);
       // node.children.forEach((child: Category) => {

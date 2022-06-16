@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Logger,
   Param,
   Post,
@@ -13,7 +15,7 @@ import { CategoriesService } from './categories.service';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
 import { createCategoryDto } from './dto/create-category.dto';
-import { Category } from './categories.entity';
+import { ActionsEnum } from '../shared/enum';
 
 @Controller('categories')
 @UseGuards(AuthGuard())
@@ -24,31 +26,63 @@ export class CategoriesController {
 
   @Post('')
   @HttpCode(201)
-  createCategory(
+  async createCategory(
     @Body() data: createCategoryDto,
-    @GetUser() user: User,
-  ): Promise<Category> {
+    @GetUser({ actions: ActionsEnum.CreateCategory }) user: User,
+  ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", create a new category. 
        data: ${JSON.stringify(data)}`,
     );
-    return this.categoriesService.createCategory(data, user);
+    try {
+      const category = await this.categoriesService.createCategory(data, user);
+      return {
+        data: category,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get('/:id')
-  getCategory(
-    @GetUser() user: User,
+  async getCategory(
+    @GetUser({ actions: ActionsEnum.ReadCategory }) user: User,
     @Param('id') id: string,
-  ): Promise<Category> {
+  ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", retrieving category by id ${id}`,
     );
-    return this.categoriesService.getCategory(Number(id), user);
+    try {
+      const category = await this.categoriesService.getCategory(
+        Number(id),
+        user,
+      );
+      return {
+        data: category,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get('/')
-  getCategories(@GetUser() user: User): Promise<Category[]> {
+  async getCategories(
+    @GetUser({ actions: ActionsEnum.ReadCategories }) user: User,
+  ): Promise<any> {
     this.logger.verbose(`User "${user.username}", retrieving categories`);
-    return this.categoriesService.getCategories(user);
+    try {
+      const categories = await this.categoriesService.getCategories(user);
+      return {
+        data: categories,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

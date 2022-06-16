@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Logger,
   Post,
   UseGuards,
@@ -10,9 +12,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
-import { Permission } from './permissions.entity';
 import { createPermissionsDto } from './dto/create-permissions.dto';
 import { PermissionsService } from './permissions.service';
+import { ActionsEnum } from '../shared/enum';
 
 @Controller('permissions')
 @UseGuards(AuthGuard())
@@ -23,24 +25,44 @@ export class PermissionsController {
 
   @Post('')
   @HttpCode(201)
-  createPermission(
+  async createPermission(
     @Body() data: createPermissionsDto,
-    @GetUser() user: User,
-  ): Promise<Permission[]> {
+    @GetUser({ actions: ActionsEnum.CreatePermission }) user: User,
+  ): Promise<any> {
     this.logger.verbose(
       `created new permissions. 
        data: ${JSON.stringify(data)}`,
     );
-    return this.permissionsService.createPermissions(data);
+    try {
+      const permission = this.permissionsService.createPermissions(data);
+      return {
+        data: permission,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get('')
   @HttpCode(200)
-  getPermissions(@GetUser() user: User): Promise<Permission[]> {
+  async getPermissions(
+    @GetUser({ actions: ActionsEnum.ReadPermissions }) user: User,
+  ): Promise<any> {
     this.logger.verbose(
       `retrieve all permissions. 
        user: ${user.username}`,
     );
-    return this.permissionsService.getPermissions();
+    try {
+      const permissions = await this.permissionsService.getPermissions();
+      return {
+        data: permissions,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

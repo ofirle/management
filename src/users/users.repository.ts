@@ -26,8 +26,8 @@ export class UsersRepository extends Repository<User> {
     });
     try {
       const userCreated = await this.save(user);
-      console.log(userCreated);
-      return { id: userCreated.id };
+      delete userCreated.password;
+      return userCreated;
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException('username or email already exist');

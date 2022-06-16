@@ -10,7 +10,9 @@ export const GetUser = createParamDecorator(
     const req = ctx.switchToHttp().getRequest();
     const user = req.user;
     if (!_data?.actions) return user;
-    const actions = _data.actions;
+    const actions = Array.isArray(_data.action)
+      ? _data.actions
+      : [_data.actions];
     if (!user.role) {
       throw new MethodNotAllowedException(
         'you dont have the permission. no role has been assigned to you',

@@ -4,6 +4,8 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Logger,
   Param,
   Post,
@@ -14,7 +16,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesService } from './roles.service';
 import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../users/user.entity';
-import { Role } from './roles.entity';
 import { createRoleDto } from './dto/create-role.dto';
 import { updateRolePermissionDto } from './dto/update-role-permission.dto';
 import { ActionsEnum } from '../shared/enum';
@@ -29,27 +30,42 @@ export class RolesController {
 
   @Post('')
   @HttpCode(201)
-  createRole(
+  async createRole(
     @Body() data: createRoleDto,
-    @GetUser() user: User,
-  ): Promise<Role> {
+    @GetUser({ actions: ActionsEnum.CreateRole }) user: User,
+  ): Promise<any> {
     this.logger.verbose(
       `created new role. 
        data: ${JSON.stringify(data)}`,
     );
-    return this.rolesService.createRole(data);
+    try {
+      const role = await this.rolesService.createRole(data);
+      return {
+        data: role,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get('')
   @HttpCode(200)
-  async getRoles(@GetUser() user: User): Promise<any> {
+  async getRoles(
+    @GetUser({ actions: ActionsEnum.ReadRoles }) user: User,
+  ): Promise<any> {
     this.logger.verbose(`User "${user.username}", retrieving all roles.`);
     const roles = await this.rolesService.getRoles();
-
-    return {
-      type: 1,
-      data: roles,
-    };
+    try {
+      return {
+        data: roles,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Put('/:id/:action')
@@ -57,58 +73,69 @@ export class RolesController {
   async updateRolePermission(
     @Param('id') roleId: number,
     @Param('action') action: ActionsEnum,
-    @GetUser() user: User,
+    @GetUser({ actions: ActionsEnum.UpdateRolePermission }) user: User,
     @Body() data: updateRolePermissionDto,
   ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", update role permission.
-       role id: ${roleId}`,
+       role id: ${roleId}, action: ${action}`,
     );
-    const role = await this.rolesService.updateRolePermission(
-      roleId,
-      action,
-      data,
-    );
-
-    return {
-      type: 1,
-      data: role,
-    };
+    try {
+      const role = await this.rolesService.updateRolePermission(
+        roleId,
+        action,
+        data,
+      );
+      return {
+        data: role,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Put('/:id')
   @HttpCode(200)
   async updateRole(
     @Param('id') roleId: number,
-    @GetUser() user: User,
+    @GetUser({ actions: ActionsEnum.UpdateRole }) user: User,
     @Body() data: UpdateRoleDto,
   ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", update role.
        role id: ${roleId}`,
     );
-    const role = await this.rolesService.updateRole(roleId, data);
-
-    return {
-      type: 1,
-      data: role,
-    };
+    try {
+      const role = await this.rolesService.updateRole(roleId, data);
+      return {
+        data: role,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Delete('/:id')
   @HttpCode(200)
   async deleteRole(
     @Param('id') roleId: number,
-    @GetUser() user: User,
+    @GetUser({ actions: ActionsEnum.DeleteRole }) user: User,
   ): Promise<any> {
     this.logger.verbose(
       `User "${user.username}", delete role.
        role id: ${roleId}`,
     );
-    await this.rolesService.deleteRole(roleId);
-
-    return {
-      type: 1,
-    };
+    try {
+      await this.rolesService.deleteRole(roleId);
+      return {};
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

@@ -2,6 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
+  Logger,
   Param,
   Post,
   UploadedFile,
@@ -14,12 +17,24 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { User } from '../users/user.entity';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { GetUser } from './get-user.decorator';
+import { ActionsEnum } from '../shared/enum';
 
 @Controller('auth')
 export class AuthController {
+  private logger = new Logger('AuthController');
+
   constructor(private authService: AuthService) {}
 
   @Post('/signup')
+  @ApiCreatedResponse({ description: 'User Registration' })
+  @ApiBody({ type: AuthSignupDto })
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -35,36 +50,90 @@ export class AuthController {
       }),
     }),
   )
-  signUp(
+  async signUp(
     @Body() authCreateCredentialsDto: AuthSignupDto,
     @UploadedFile() image,
-  ): Promise<{ id: number }> {
+  ): Promise<any> {
     authCreateCredentialsDto.image = image.filename;
-    return this.authService.signUp(authCreateCredentialsDto);
+    try {
+      const user = await this.authService.signUp(authCreateCredentialsDto);
+      return {
+        data: user,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Post('/signin')
-  signIn(
-    @Body() authSigninCredentialsDto: AuthSignInDto,
-  ): Promise<{ accessToken: string }> {
-    return this.authService.signIn(authSigninCredentialsDto);
+  @ApiOkResponse({ description: 'User login' })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
+  @ApiBody({ type: AuthSignInDto })
+  async signIn(@Body() authSigninCredentialsDto: AuthSignInDto): Promise<any> {
+    try {
+      const accessToken = await this.authService.signIn(
+        authSigninCredentialsDto,
+      );
+      return {
+        data: accessToken,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get('/users')
-  getUsers(): Promise<User[]> {
-    return this.authService.getUsers();
+  async getUsers(
+    @GetUser({ actions: ActionsEnum.ReadUsers }) user: User,
+  ): Promise<any> {
+    try {
+      const users = this.authService.getUsers();
+      return {
+        data: users,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get('/users/:uid')
-  getUser(@Param('uid') id: number): Promise<User> {
-    return this.authService.getUser(id);
+  async getUser(
+    @GetUser({ actions: ActionsEnum.ReadUser }) user: User,
+    @Param('uid') id: number,
+  ): Promise<any> {
+    try {
+      const userData = await this.authService.getUser(id);
+      return {
+        data: userData,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Post('/users/:uid/roles/:rid')
-  attachRole(
+  async attachRole(
+    @GetUser({ actions: ActionsEnum.AttachUserRole }) user: User,
     @Param('uid') userId: number,
     @Param('rid') roleId: number,
-  ): Promise<User> {
-    return this.authService.attachRole(userId, roleId);
+  ): Promise<any> {
+    try {
+      const userData = await this.authService.attachRole(userId, roleId);
+      return {
+        data: userData,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
