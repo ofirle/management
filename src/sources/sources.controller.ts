@@ -11,7 +11,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { SourcesService } from './sources.service';
 import { GetUser } from '../auth/get-user.decorator';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { createSourceDto } from './dto/create-source.dto';
 import { ActionsEnum } from '../shared/enum';
 

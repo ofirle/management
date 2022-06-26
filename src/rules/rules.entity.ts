@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { Category } from '../categories/categories.entity';
 import { Type } from '../transactions/dto/enums';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { Source } from '../sources/sources.entity';
 import { Account } from '../accounts/accounts.entity';
 

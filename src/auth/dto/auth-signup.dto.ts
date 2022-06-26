@@ -1,5 +1,12 @@
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../../roles/roles.entity';
 
 export class AuthSignupDto {
   @IsNotEmpty()
@@ -33,4 +40,9 @@ export class AuthSignupDto {
   password: string;
   @ApiProperty()
   image: any;
+  @IsOptional()
+  @ApiProperty({
+    type: Role,
+  })
+  role?: Role;
 }

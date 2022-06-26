@@ -6,8 +6,8 @@ import { SeedsController } from './seeds.controller';
 import { CategoriesRepository } from '../categories/categories.repository';
 import { PermissionsRepository } from '../permissions/permissions.repository';
 import { RolesRepository } from '../roles/roles.repository';
-import { UsersRepository } from '../users/users.repository';
 import { AccountsRepository } from '../accounts/accounts.repository';
+import { AuthRepository } from '../auth/auth.repository';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { AccountsRepository } from '../accounts/accounts.repository';
       CategoriesRepository,
       PermissionsRepository,
       RolesRepository,
-      UsersRepository,
+      AuthRepository,
       AccountsRepository,
     ]),
     AuthModule,

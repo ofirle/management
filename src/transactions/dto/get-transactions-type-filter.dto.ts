@@ -6,6 +6,9 @@ export class GetTransactionsTypeFilter {
   description: string;
   @IsString()
   @IsOptional()
+  title: string;
+  @IsString()
+  @IsOptional()
   note: string;
   @IsArray()
   @IsOptional()
@@ -28,4 +31,7 @@ export class GetTransactionsTypeFilter {
   @IsString()
   @IsOptional()
   dateEnd: string;
+  @IsArray()
+  @IsOptional()
+  archived: string[];
 }

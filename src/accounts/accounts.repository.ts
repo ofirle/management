@@ -1,7 +1,7 @@
 import { EntityRepository, getManager, Repository } from 'typeorm';
 import { Account } from './accounts.entity';
 import { createAccountDto } from './dto/create-account.dto';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { attachAccountDto } from './dto/attach-account.dto';
 import {
   ConflictException,
@@ -38,10 +38,7 @@ export class AccountsRepository extends Repository<Account> {
     if (user.account) {
       throw new ConflictException('user already attached to existing account');
     }
-    const account = await this.findOne({ id: accountId });
-    if (!account) {
-      throw new NotFoundException('account id provided is not exist');
-    }
+    const account = await this.getAccount(accountId);
     if (data.secret !== account.secret) {
       throw new NotAcceptableException(
         'secret provided to this account is not match',
@@ -49,6 +46,14 @@ export class AccountsRepository extends Repository<Account> {
     }
     user.account = account;
     await getManager().getRepository(User).save(user);
+    return account;
+  }
+
+  async getAccount(accountId) {
+    const account = await this.findOne({ id: accountId });
+    if (!account) {
+      throw new NotFoundException('account id provided is not exist');
+    }
     return account;
   }
 }

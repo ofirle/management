@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoriesRepository } from './categories.repository';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { Category } from './categories.entity';
 import { createCategoryDto } from './dto/create-category.dto';
 

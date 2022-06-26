@@ -3,7 +3,7 @@ import {
   ExecutionContext,
   MethodNotAllowedException,
 } from '@nestjs/common';
-import { User } from '../users/user.entity';
+import { User } from './auth.entity';
 
 export const GetUser = createParamDecorator(
   (_data, ctx: ExecutionContext): User => {
@@ -13,7 +13,7 @@ export const GetUser = createParamDecorator(
     const actions = Array.isArray(_data.action)
       ? _data.actions
       : [_data.actions];
-    if (!user.role) {
+    if (!user?.role) {
       throw new MethodNotAllowedException(
         'you dont have the permission. no role has been assigned to you',
       );

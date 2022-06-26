@@ -3,26 +3,32 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersRepository } from '../users/users.repository';
 import { AuthSignupDto } from './dto/auth-signup.dto';
 import { AuthSignInDto } from './dto/auth-sign-in.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
-import { User } from '../users/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RolesRepository } from '../roles/roles.repository';
+import { Admins } from '../roles/enum';
+import { User } from './auth.entity';
+import { AuthRepository } from './auth.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersRepository: UsersRepository,
+    private usersRepository: AuthRepository,
     private jwtService: JwtService,
     @InjectRepository(RolesRepository)
     private rolesRepository: RolesRepository,
   ) {}
 
   async signUp(authCredentialsDto: AuthSignupDto): Promise<{ id: number }> {
+    if (!authCredentialsDto.role) {
+      authCredentialsDto.role = await this.rolesRepository.findOne({
+        key: Admins.Admin,
+      });
+    }
     return this.usersRepository.createUser(authCredentialsDto);
   }
 
@@ -66,8 +72,6 @@ export class AuthService {
     if (!role) {
       throw new NotFoundException('role not found');
     }
-    user.role = role;
-    await this.usersRepository.save(user);
-    return user;
+    return await this.usersRepository.attachRole(user, role);
   }
 }

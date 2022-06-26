@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransactionRepository } from './transaction.repository';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from './transaction.entity';
 import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dto';
@@ -11,6 +11,7 @@ import { Source } from '../sources/sources.entity';
 import { BankType, CreditCardType, SourceType } from '../sources/dto/enums';
 import { Type } from './dto/enums';
 import { CategoriesRepository } from '../categories/categories.repository';
+import { displayUserData } from '../shared/displayEntity';
 
 @Injectable()
 export class TransactionsService {
@@ -28,6 +29,8 @@ export class TransactionsService {
     try {
       return this.transactionRepository.createTransaction(data, user);
     } catch (err) {
+      console.log(data);
+      console.log('HERE');
       throw err;
     }
   }
@@ -70,18 +73,32 @@ export class TransactionsService {
   async getTransactions(
     filterDto: GetTransactionsTypeFilter,
     user: User,
-  ): Promise<Transaction[]> {
+  ): Promise<any[]> {
     if (filterDto.categories) {
       filterDto.categories =
         await this.categoryRepository.getFlatDescendantsIds(
           filterDto.categories,
         );
     }
-    return this.transactionRepository.getTransactions(filterDto, user);
+    let transactions = await this.transactionRepository.getTransactions(
+      filterDto,
+      user,
+    );
+    transactions = transactions.map((transaction) => {
+      return { ...transaction, user: displayUserData(user) };
+    });
+    return transactions;
   }
 
   async getTransaction(id: string, user: User): Promise<Transaction> {
     return this.transactionRepository.getTransaction(id, user);
+  }
+
+  async archiveTransaction(transaction: Transaction): Promise<Transaction> {
+    return this.transactionRepository.save({
+      ...transaction,
+      isArchived: true,
+    });
   }
 
   hashString = (string: string) => {
@@ -107,7 +124,6 @@ export class TransactionsService {
         data = await this.parseIsracard(filename);
         break;
     }
-    console.log(data);
     return await Promise.all(
       data.map((transaction) => {
         return this.createTransaction(transaction, userId);
@@ -148,7 +164,7 @@ export class TransactionsService {
         note: null,
         source: source.id,
       };
-      data.push({ ...row, hash: this.hashString(JSON.stringify(data)) });
+      data.push({ ...row, hash: this.hashString(JSON.stringify(row)) });
       DataRowIndex += 1;
     }
     return data;
@@ -160,7 +176,6 @@ export class TransactionsService {
   ) => {
     const dataIntentional = [];
     indexIntentional += 3;
-    console.log(indexIntentional);
     while (
       `F${indexIntentional}` in worksheet &&
       worksheet[`F${indexIntentional}`].v !== ''
@@ -191,10 +206,17 @@ export class TransactionsService {
         hash: this.hashString(JSON.stringify(row)),
       });
       indexIntentional += 1;
-      console.log(indexIntentional);
     }
     return { dataIntentional, indexIntentional };
   };
+
+  stringContainsAny(string: string, options: string[]): boolean {
+    return options.some((element) => string.includes(element));
+  }
+
+  stringEmpty(string: string): boolean {
+    return string === '';
+  }
 
   getDataSingleCreditCardIsracardLocal = (worksheet, indexLocal, sourceId) => {
     const dataLocal = [];
@@ -206,7 +228,11 @@ export class TransactionsService {
       let paymentNumber = null;
       if (
         `H${indexLocal}` in worksheet &&
-        !['', 'זיכוי'].includes(worksheet[`H${indexLocal}`].v)
+        !this.stringEmpty(worksheet[`H${indexLocal}`].v) &&
+        !this.stringContainsAny(worksheet[`H${indexLocal}`].v, [
+          'הנחה',
+          'זיכוי',
+        ])
       ) {
         paymentNumber = parseInt(
           worksheet[`H${indexLocal}`].v
@@ -257,23 +283,26 @@ export class TransactionsService {
     ) {
       return { data, index: index + 3 };
     }
-    index += 3;
-    const { dataLocal, indexLocal } = this.getDataSingleCreditCardIsracardLocal(
-      worksheet,
-      index,
-      sourceId,
-    );
-    index = indexLocal;
-    data.push(...dataLocal);
 
-    const { dataIntentional, indexIntentional } =
-      this.getDataSingleCreditCardIsracardIntentional(
-        worksheet,
-        index,
-        sourceId,
-      );
-    index = indexIntentional;
-    data.push(...dataIntentional);
+    try {
+      index += 3;
+      const { dataLocal, indexLocal } =
+        this.getDataSingleCreditCardIsracardLocal(worksheet, index, sourceId);
+      index = indexLocal;
+      data.push(...dataLocal);
+
+      const { dataIntentional, indexIntentional } =
+        this.getDataSingleCreditCardIsracardIntentional(
+          worksheet,
+          index,
+          sourceId,
+        );
+      index = indexIntentional;
+      data.push(...dataIntentional);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
     return { data, index: index + 2 };
   };
 
@@ -287,21 +316,25 @@ export class TransactionsService {
       type: SourceType.CREDIT_CARD,
       typeKey: CreditCardType.ISRACARD,
     });
-    console.log(worksheet);
     //not include international actions
-
-    while (
-      `A${DataRowIndex}` in worksheet &&
-      worksheet[`A${DataRowIndex}`].v !== ''
-    ) {
-      const { data, index } = this.getDataSingleCreditCardIsracard(
-        source.id,
-        worksheet,
-        DataRowIndex,
-      );
-      totalData.push(...data);
-      DataRowIndex = index;
+    try {
+      while (
+        `A${DataRowIndex}` in worksheet &&
+        worksheet[`A${DataRowIndex}`].v !== ''
+      ) {
+        const { data, index } = this.getDataSingleCreditCardIsracard(
+          source.id,
+          worksheet,
+          DataRowIndex,
+        );
+        totalData.push(...data);
+        DataRowIndex = index;
+      }
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
+
     return totalData;
   };
 }

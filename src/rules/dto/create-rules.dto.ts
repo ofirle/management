@@ -12,11 +12,14 @@ import { NumberRuleConditionDto } from './number-rule-condition.dto';
 import { Type } from 'class-transformer';
 import { Type as TransactionType } from '../../transactions/dto/enums';
 import { setDataDto } from './set-data.dto';
+import { ConfigRuleDto } from './config-rule.dto';
 
 export class createRulesDto {
+  @ValidateNested()
+  config: ConfigRuleDto;
   @IsString()
   @IsNotEmpty()
-  title: string;
+  conditions: string;
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

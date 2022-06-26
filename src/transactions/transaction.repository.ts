@@ -9,17 +9,23 @@ import {
   Repository,
 } from 'typeorm';
 import { Transaction } from './transaction.entity';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dto';
+import { Logger, NotFoundException } from '@nestjs/common';
+import { displayUserData } from '../shared/displayEntity';
 
 @EntityRepository(Transaction)
 export class TransactionRepository extends Repository<Transaction> {
+  private logger = new Logger('TransactionController');
+
   async getTransactions(
     filters: GetTransactionsTypeFilter,
     user: User,
   ): Promise<Transaction[]> {
+    console.log(filters);
     const {
+      archived,
       dateStart,
       dateEnd,
       types,
@@ -28,10 +34,15 @@ export class TransactionRepository extends Repository<Transaction> {
       note,
       categories,
       description,
+      title,
       usersId,
     } = filters;
     const findFilters = {};
     findFilters['account'] = Equal(user.accountId);
+    findFilters['isArchived'] = false;
+    if (archived && archived.includes('yes') && archived.length === 1) {
+      findFilters['isArchived'] = true;
+    }
     if (usersId) {
       findFilters['user'] = In(usersId);
     }
@@ -42,24 +53,31 @@ export class TransactionRepository extends Repository<Transaction> {
       findFilters['note'] = Like(`%${note}%`);
     }
 
+    if (title) {
+      findFilters['title'] = Like(`%${title}%`);
+      findFilters['description'] = Like(`%${title}%`);
+    }
+
     if (amountMin || amountMax)
       findFilters['amount'] = this.getQueryFilterRange(amountMin, amountMax);
     if (types) {
       findFilters['type'] = In(types);
     }
     if (categories) {
-      console.log(categories);
       findFilters['category'] = In(categories);
     }
 
     if (dateStart || dateEnd)
       findFilters['date'] = this.getQueryFilterRange(dateStart, dateEnd);
-    console.log(findFilters);
     return await this.find(findFilters);
   }
 
   async getTransaction(id, user: User): Promise<Transaction> {
-    return await this.findOne({ id, user });
+    const transaction = await this.findOne({ id, user });
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
+    }
+    return transaction;
   }
 
   getQueryFilterRange(dataMin, dataMax) {
@@ -82,7 +100,19 @@ export class TransactionRepository extends Repository<Transaction> {
       user,
       account: user.accountId,
     });
-    await this.save(transaction);
+    try {
+      await this.save(transaction);
+    } catch (err) {
+      if (err.code === '23505') {
+        this.logger.error(`Duplicate Row: ${JSON.stringify(transaction)}`);
+        return transaction;
+      }
+      this.logger.error(`Error: ${JSON.stringify(err)}`);
+      this.logger.error(`Transaction: ${JSON.stringify(transaction)}`);
+
+      throw err;
+    }
+    transaction.user = displayUserData(transaction.user);
     return transaction;
   }
 

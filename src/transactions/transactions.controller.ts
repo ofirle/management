@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpException,
@@ -14,14 +15,14 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { TransactionsService } from './transactions.service';
 import { GetUser } from '../auth/get-user.decorator';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { transactionsTypeTitleMapping } from './category.mapping';
 import { LoadFileDto } from './dto/load-filte.dto';
 import { CategoriesService } from '../categories/categories.service';
-import { UsersRepository } from '../users/users.repository';
 import { ActionsEnum } from '../shared/enum';
 import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dto';
+import { AuthRepository } from '../auth/auth.repository';
 
 @Controller('transactions')
 @UseGuards(AuthGuard())
@@ -31,7 +32,7 @@ export class TransactionsController {
   constructor(
     private transactionsService: TransactionsService,
     private categoriesService: CategoriesService,
-    private userRepository: UsersRepository,
+    private authRepository: AuthRepository,
   ) {}
 
   @Get('/initData')
@@ -39,7 +40,7 @@ export class TransactionsController {
     @GetUser({ actions: ActionsEnum.ReadTransactions }) user: User,
   ): Promise<any> {
     this.logger.verbose(`getInitData`);
-    const users = await this.userRepository.find({ account: user.accountId });
+    const users = await this.authRepository.find({ account: user.accountId });
     const usersData = users.map((userLocal) => {
       return {
         id: userLocal.id,
@@ -172,6 +173,30 @@ export class TransactionsController {
       );
       return {
         data: transactions,
+      };
+    } catch (err) {
+      this.logger.error(err);
+      if (err instanceof HttpException) throw err;
+      return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Delete('/:id')
+  async deleteTransaction(
+    @GetUser({ actions: ActionsEnum.ReadTransaction }) user: User,
+    @Param('id') id: string,
+  ): Promise<any> {
+    this.logger.verbose(`User "${user.username}", delete transaction`);
+    try {
+      let transaction = await this.transactionsService.getTransaction(id, user);
+
+      transaction = await this.transactionsService.archiveTransaction(
+        transaction,
+      );
+
+      return {
+        type: 1,
+        data: transaction,
       };
     } catch (err) {
       this.logger.error(err);

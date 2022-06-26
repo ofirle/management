@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/get-user.decorator';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { createPermissionsDto } from './dto/create-permissions.dto';
 import { PermissionsService } from './permissions.service';
 import { ActionsEnum } from '../shared/enum';

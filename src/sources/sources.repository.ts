@@ -1,6 +1,6 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { Source } from './sources.entity';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { createSourceDto } from './dto/create-source.dto';
 import { BankType, CreditCardType, SourceType } from './dto/enums';
 

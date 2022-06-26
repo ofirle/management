@@ -10,8 +10,9 @@ import { SourcesModule } from './sources/sources.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RolesModule } from './roles/roles.module';
-import { typeOrmAsyncConfig } from './config/typeorm.config';
 import { SeedsModule } from './seeds/seeds.module';
+import { UsersModule } from './users/users.module';
+import { typeOrmAsyncConfig } from './config/typeorm.config';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SeedsModule } from './seeds/seeds.module';
       validationSchema: configValidationSchema,
     }),
     AuthModule,
+    UsersModule,
     PermissionsModule,
     TransactionsModule,
     CategoriesModule,

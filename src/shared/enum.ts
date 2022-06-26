@@ -19,11 +19,13 @@ export enum ActionsEnum {
   CreateSource = 'CREATE_SOURCE',
   //transactions
   ReadTransactions = 'READ_TRANSACTIONS',
+  DeleteTransaction = 'DELETE_TRANSACTION',
   ReadTransaction = 'READ_TRANSACTION',
   CreateTransaction = 'CREATE_TRANSACTION',
   ImportTransactions = 'IMPORT_TRANSACTIONS',
   //users
   ReadUser = 'READ_USER',
   ReadUsers = 'READ_USERS',
+  UpdateUser = 'UPDATE_USERS',
   AttachUserRole = 'ATTACH_USER_ROLE',
 }

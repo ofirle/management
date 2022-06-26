@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/get-user.decorator';
-import { User } from '../users/user.entity';
 import { AccountsService } from './accounts.service';
 import { createAccountDto } from './dto/create-account.dto';
 import { attachAccountDto } from './dto/attach-account.dto';
 import { ActionsEnum } from '../shared/enum';
+import { User } from '../auth/auth.entity';
 
 @Controller('accounts')
 @UseGuards(AuthGuard())

@@ -15,7 +15,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { RolesService } from './roles.service';
 import { GetUser } from '../auth/get-user.decorator';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { createRoleDto } from './dto/create-role.dto';
 import { updateRolePermissionDto } from './dto/update-role-permission.dto';
 import { ActionsEnum } from '../shared/enum';
@@ -56,8 +56,8 @@ export class RolesController {
     @GetUser({ actions: ActionsEnum.ReadRoles }) user: User,
   ): Promise<any> {
     this.logger.verbose(`User "${user.username}", retrieving all roles.`);
-    const roles = await this.rolesService.getRoles();
     try {
+      const roles = await this.rolesService.getRoles();
       return {
         data: roles,
       };
@@ -88,6 +88,7 @@ export class RolesController {
       );
       return {
         data: role,
+        type: 1,
       };
     } catch (err) {
       this.logger.error(err);

@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { Rule } from '../rules/rules.entity';
 import { Transaction } from '../transactions/transaction.entity';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { Account } from '../accounts/accounts.entity';
 
 @Entity()
@@ -22,8 +22,8 @@ export class Category {
   @Column()
   title: string;
 
-  // @Column({ nullable: true })
-  // value: number;
+  @Column({ nullable: true })
+  value: number;
 
   @Column({
     nullable: true,

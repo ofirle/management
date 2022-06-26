@@ -13,9 +13,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { CategoriesService } from './categories.service';
 import { GetUser } from '../auth/get-user.decorator';
-import { User } from '../users/user.entity';
 import { createCategoryDto } from './dto/create-category.dto';
 import { ActionsEnum } from '../shared/enum';
+import { User } from '../auth/auth.entity';
 
 @Controller('categories')
 @UseGuards(AuthGuard())

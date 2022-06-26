@@ -1,6 +1,6 @@
 import { EntityRepository, getManager, Repository } from 'typeorm';
 import { Category } from './categories.entity';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { createCategoryDto } from './dto/create-category.dto';
 
 @EntityRepository(Category)
@@ -67,7 +67,7 @@ export class CategoriesRepository extends Repository<Category> {
 
   parseCategoriesRec = (trees: Category[]) => {
     trees.forEach((node: Category) => {
-      // node.value = node.id;
+      node.value = node.id;
       if (node.children.length === 0) return;
       this.parseCategoriesRec(node.children);
       // node.children.forEach((child: Category) => {

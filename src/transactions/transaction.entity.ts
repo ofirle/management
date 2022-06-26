@@ -7,8 +7,7 @@ import {
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
-import { User } from '../users/user.entity';
-import { Exclude } from 'class-transformer';
+import { User } from '../auth/auth.entity';
 import { Type } from './dto/enums';
 import { Source } from '../sources/sources.entity';
 import { Category } from '../categories/categories.entity';
@@ -50,8 +49,7 @@ export class Transaction {
   categoryId: number;
   @ManyToOne(() => Source, (source) => source.transactions, { eager: true })
   source: Source;
-  @ManyToOne(() => User, (user) => user.transactions, { eager: false })
-  @Exclude({ toPlainOnly: true })
+  @ManyToOne(() => User, (user) => user.transactions, { eager: true })
   user: User;
   @ManyToOne(() => Account, (account) => account.transactions)
   account: Account | number;

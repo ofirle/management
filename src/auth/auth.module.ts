@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersRepository } from '../users/users.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './dto/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RolesRepository } from '../roles/roles.repository';
+import { AuthRepository } from './auth.repository';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { RolesRepository } from '../roles/roles.repository';
         },
       }),
     }),
-    TypeOrmModule.forFeature([UsersRepository, RolesRepository]),
+    TypeOrmModule.forFeature([AuthRepository, RolesRepository]),
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

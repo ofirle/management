@@ -8,9 +8,9 @@ import {
 } from 'class-validator';
 import { Type } from './enums';
 import { ManyToOne } from 'typeorm';
-import { User } from '../../users/user.entity';
 import { Exclude } from 'class-transformer';
 import { Category } from '../../categories/categories.entity';
+import { User } from '../../auth/auth.entity';
 
 export class CreateTransactionDto {
   @IsNotEmpty()

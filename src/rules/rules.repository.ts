@@ -1,6 +1,6 @@
 import { EntityRepository, getManager, Like, Repository } from 'typeorm';
 import { Rule } from './rules.entity';
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 import { createRulesDto } from './dto/create-rules.dto';
 import { Transaction } from '../transactions/transaction.entity';
 import { StringComparisonFunctions } from './dto/enum';

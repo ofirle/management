@@ -11,4 +11,7 @@ export class Permission {
 
   @Column({ unique: true })
   action: ActionsEnum;
+
+  @Column({ nullable: true })
+  entity: string;
 }

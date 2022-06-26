@@ -16,7 +16,6 @@ import { AuthSignInDto } from './dto/auth-sign-in.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { User } from '../users/user.entity';
 import {
   ApiBody,
   ApiCreatedResponse,
@@ -25,6 +24,7 @@ import {
 } from '@nestjs/swagger';
 import { GetUser } from './get-user.decorator';
 import { ActionsEnum } from '../shared/enum';
+import { User } from './auth.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -102,13 +102,10 @@ export class AuthController {
     }
   }
 
-  @Get('/users/:uid')
-  async getUser(
-    @GetUser({ actions: ActionsEnum.ReadUser }) user: User,
-    @Param('uid') id: number,
-  ): Promise<any> {
+  @Get('/info')
+  async getUser(@GetUser() user: User): Promise<any> {
     try {
-      const userData = await this.authService.getUser(id);
+      const userData = await this.authService.getUser(user.id);
       return {
         data: userData,
       };

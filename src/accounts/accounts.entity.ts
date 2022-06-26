@@ -6,9 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Transaction } from '../transactions/transaction.entity';
-import { User } from '../users/user.entity';
 import { Category } from '../categories/categories.entity';
 import { Rule } from '../rules/rules.entity';
+import { User } from '../auth/auth.entity';
 
 @Entity()
 export class Account {

@@ -1,4 +1,4 @@
-import { User } from '../users/user.entity';
+import { User } from '../auth/auth.entity';
 
 export const hideUserData = (user: User): User => {
   const user2 = new User();
