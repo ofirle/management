@@ -13,7 +13,6 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../auth/auth.entity';
 import { createRulesDto } from './dto/create-rules.dto';
 import { Rule } from './rules.entity';
-import { Transaction } from '../transactions/transaction.entity';
 
 @Controller('rules')
 @UseGuards(AuthGuard())
@@ -36,13 +35,13 @@ export class RulesController {
     return this.RuleService.createRule(data, user);
   }
 
-  @Post('/run')
-  runRules(@GetUser() user: User): Promise<Transaction[]> {
-    this.logger.verbose(
-      `User "${user.username}", run all rules from account ${user.accountId}`,
-    );
-    return this.RuleService.runRules(user);
-  }
+  // @Post('/run')
+  // runRules(@GetUser() user: User): Promise<Transaction[]> {
+  //   this.logger.verbose(
+  //     `User "${user.username}", run all rules from account ${user.accountId}`,
+  //   );
+  //   return this.RuleService.runRules(user);
+  // }
 
   @Get('')
   getRules(@GetUser() user: User): Promise<Rule[]> {

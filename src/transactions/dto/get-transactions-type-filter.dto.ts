@@ -34,4 +34,7 @@ export class GetTransactionsTypeFilter {
   @IsArray()
   @IsOptional()
   archived: string[];
+  @IsString()
+  @IsOptional()
+  ruleId: string;
 }

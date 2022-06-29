@@ -23,6 +23,7 @@ import { CategoriesService } from '../categories/categories.service';
 import { ActionsEnum } from '../shared/enum';
 import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dto';
 import { AuthRepository } from '../auth/auth.repository';
+import { RulesService } from '../rules/rules.service';
 
 @Controller('transactions')
 @UseGuards(AuthGuard())
@@ -32,6 +33,7 @@ export class TransactionsController {
   constructor(
     private transactionsService: TransactionsService,
     private categoriesService: CategoriesService,
+    private rulesService: RulesService,
     private authRepository: AuthRepository,
   ) {}
 
@@ -49,9 +51,11 @@ export class TransactionsController {
     });
     try {
       const categories = await this.categoriesService.getCategories(user);
+      const rules = await this.rulesService.getRules(user);
       return {
         data: {
           categories: categories,
+          rules: rules,
           users: usersData,
           typeMapping: transactionsTypeTitleMapping,
         },
@@ -155,6 +159,29 @@ export class TransactionsController {
       return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  // @Get('/rules/:id')
+  // async getTransactionByRule(
+  //   @GetUser({ actions: ActionsEnum.ReadTransaction }) user: User,
+  //   @Param('id') ruleId: number,
+  // ): Promise<any> {
+  //   this.logger.verbose(
+  //     `User "${user.username}", retrieving transaction by rule id ${ruleId}`,
+  //   );
+  //   try {
+  //     const transaction = await this.transactionsService.getTransactionByRule(
+  //       ruleId,
+  //       user,
+  //     );
+  //     return {
+  //       data: transaction,
+  //     };
+  //   } catch (err) {
+  //     this.logger.error(err);
+  //     if (err instanceof HttpException) throw err;
+  //     return new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+  //   }
+  // }
 
   @Get()
   @HttpCode(200)

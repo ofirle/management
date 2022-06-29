@@ -20,10 +20,11 @@ export class TransactionRepository extends Repository<Transaction> {
   private logger = new Logger('TransactionController');
 
   async getTransactions(
-    filters: GetTransactionsTypeFilter,
+    filterParams: GetTransactionsTypeFilter,
+    ruleFilters: any,
     user: User,
   ): Promise<Transaction[]> {
-    console.log(filters);
+    console.log(filterParams);
     const {
       archived,
       dateStart,
@@ -36,8 +37,8 @@ export class TransactionRepository extends Repository<Transaction> {
       description,
       title,
       usersId,
-    } = filters;
-    const findFilters = {};
+    } = filterParams;
+    const findFilters = { ...ruleFilters };
     findFilters['account'] = Equal(user.accountId);
     findFilters['isArchived'] = false;
     if (archived && archived.includes('yes') && archived.length === 1) {
@@ -116,58 +117,52 @@ export class TransactionRepository extends Repository<Transaction> {
     return transaction;
   }
 
-  // async updatePutTransaction(
-  //   id: string,
-  //   data: CreateTransactionDto,
+  // async getTransactionByRule(
+  //   ruleId: number,
   //   user: User,
-  // ): Promise<Transaction> {
-  //   const paid = data.hasOwnProperty('paid') && data.paid === 'true';
+  // ): Promise<Transaction[]> {
+  //   const rule = await getManager()
+  //     .getRepository(Rule)
+  //     .findOne({ id: ruleId, account: user.accountId });
   //
-  //   const transactionToUpdate = await this.findOne({
-  //     where: { id },
-  //   });
-  //   console.log(transactionToUpdate);
-  //   transactionToUpdate.date = data.date;
-  //   transactionToUpdate.note = data.note;
-  //   transactionToUpdate.amount = data.amount;
-  //   transactionToUpdate.type = data.type;
-  //   transactionToUpdate.category = data.category;
-  //   transactionToUpdate.paid = paid;
-  //   try {
-  //     await this.save(transactionToUpdate);
-  //   } catch (err) {
-  //     console.log(err.stack);
-  //     throw err;
+  //   if (!rule) {
+  //     throw new NotFoundException('Rule not found');
   //   }
-  //   return transactionToUpdate;
-  // }
+  //   const filters = [];
+  //   console.log(rule.conditions);
+  //   rule.conditions.title.forEach((condition) => {
+  //     const value = condition.value.toLowerCase();
+  //     switch (condition.comparisonFunction) {
+  //       case StringComparisonFunctions.CONTAINS:
+  //         filters['description'] = Like(`%${value}%`);
+  //         break;
+  //       case StringComparisonFunctions.EQUAL:
+  //         filters['description'] = Like(`${value}`);
+  //         break;
+  //       case StringComparisonFunctions.START_WITH:
+  //         filters['description'] = Like(`%${value}`);
+  //         break;
+  //       case StringComparisonFunctions.END_WITH:
+  //         filters['description'] = Like(`${value}%`);
+  //         break;
+  //       default:
+  //         throw new Error(
+  //           `method ${condition.comparisonFunction} not supported yet`,
+  //         );
+  //     }
+  //   });
+  //   if (rule.type) {
+  //     filters['type'] = rule.type;
+  //   }
   //
-  // async updatePatchTransaction(
-  //   id: string,
-  //   data: UpdatePatchTransactionDto,
-  //   user: User,
-  // ): Promise<Transaction> {
-  //   const transactionToUpdate = await this.findOne({
-  //     where: { id },
+  //   const transactions = await this.find({
+  //     user,
+  //     ...filters,
   //   });
-  //   let paid = transactionToUpdate.paid;
-  //   if (data.hasOwnProperty('paid')) {
-  //     paid = data.paid === 'true';
-  //   }
-  //   transactionToUpdate.date = data.date || transactionToUpdate.date;
-  //   transactionToUpdate.note = data.note || transactionToUpdate.note;
-  //   transactionToUpdate.amount = data.amount || transactionToUpdate.amount;
-  //   transactionToUpdate.type = data.type || transactionToUpdate.type;
-  //   transactionToUpdate.category =
-  //     data.category || transactionToUpdate.category;
-  //   transactionToUpdate.paid = paid;
-  //   try {
-  //     console.log(transactionToUpdate);
-  //     await this.save(transactionToUpdate);
-  //   } catch (err) {
-  //     console.log(err.stack);
-  //     throw err;
-  //   }
-  //   return transactionToUpdate;
+  //   console.log(rule);
+  //   console.log(filters);
+  //   console.log(transactions);
+  //
+  //   return transactions;
   // }
 }

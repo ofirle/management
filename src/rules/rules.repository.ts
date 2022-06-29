@@ -1,38 +1,114 @@
-import { EntityRepository, getManager, Like, Repository } from 'typeorm';
+import { EntityRepository, Like, Repository } from 'typeorm';
 import { Rule } from './rules.entity';
 import { User } from '../auth/auth.entity';
 import { createRulesDto } from './dto/create-rules.dto';
-import { Transaction } from '../transactions/transaction.entity';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { StringComparisonFunctions } from './dto/enum';
-import { BadRequestException } from '@nestjs/common';
 
 @EntityRepository(Rule)
 export class RulesRepository extends Repository<Rule> {
+  async getRuleFilter(ruleId: number, user: User): Promise<any> {
+    const rule = await this.findOne({ id: ruleId, account: user.accountId });
+
+    if (!rule) {
+      throw new NotFoundException('Rule not found');
+    }
+    const filters = [];
+    rule.conditions.title.forEach((condition) => {
+      const value = condition.value.toLowerCase();
+      switch (condition.comparisonFunction) {
+        case StringComparisonFunctions.CONTAINS:
+          filters['description'] = Like(`%${value}%`);
+          break;
+        case StringComparisonFunctions.EQUAL:
+          filters['description'] = Like(`${value}`);
+          break;
+        case StringComparisonFunctions.START_WITH:
+          filters['description'] = Like(`%${value}`);
+          break;
+        case StringComparisonFunctions.END_WITH:
+          filters['description'] = Like(`${value}%`);
+          break;
+        default:
+          throw new Error(
+            `method ${condition.comparisonFunction} not supported yet`,
+          );
+      }
+    });
+    if (rule.type) {
+      filters['type'] = rule.type;
+    }
+
+    return filters;
+  }
+
   async createRule(data: createRulesDto, user: User): Promise<Rule> {
     const rule = new Rule();
-    if (!data.titleConditions && !data.priceConditions) {
+    if (!data.conditions) {
       throw new BadRequestException('no condition has been set');
     }
+
+    /* {
+       "config": {
+       "title": "משכורת אופיר סופרסוניק"
+     },
+       "conditions": [
+       {
+         "option": [
+           "title",
+           "CONTAINS"
+         ],
+         "value": "סופרסוניק"
+       }
+     ],
+       "value": {
+       "title": "משכורת סופרסוניק",
+         "category": 19,
+         "archived": "NO"
+     }
+     }*/
+
     const conditions = {
-      title: data.titleConditions || [],
-      price: data.priceConditions || [],
+      title: [],
+      price: [],
     };
-    rule.account = user.account;
-    rule.title = data.title;
+    rule.title = data.config.title;
+    data.conditions.forEach((condition) => {
+      const conditionData = {
+        comparisonFunction: condition.comparisonFunction,
+        value: condition.value,
+        isNegative: condition.isNegative,
+      };
+      if (condition.field === 'title') {
+        conditions.title.push(conditionData);
+      } else if (condition.field === 'price') {
+        conditions.price.push(conditionData);
+      } else {
+        throw new Error(`Condition type not suppoerted: ${condition?.field}`);
+      }
+    });
+    rule.value = JSON.stringify({
+      title: data.value.title,
+      category: data.value.category,
+      isArchived: data.value.isArchived,
+    });
+
+    rule.type = data.type ?? null;
+
     rule.conditions = conditions;
-    if (data.sourceIds) {
-      rule.sources = data.sourceIds;
-      // rule.sources = await getManager().findByIds(Source, data.sourceIds);
-    }
-    rule.transactionType = data.transactionType ?? null;
+    rule.account = user.accountId;
+    // rule.conditions = conditions;
+    // if (data.sourceIds) {
+    //   rule.sources = data.sourceIds;
+    //   // rule.sources = await getManager().findByIds(Source, data.sourceIds);
+    // }
     rule.user = user.id;
-    const { categoryId, isArchived, title } = data.setData;
-    if (categoryId) {
-      rule.category = categoryId;
-      // rule.category = await getManager().findOne(Category, categoryId);
-    }
-    rule.setTitle = title;
-    rule.isArchived = isArchived;
+
+    console.log(rule);
+    // const { categoryId, isArchived, title } = data.setData;
+    // rule.category = await getM anager().findOne(Category, categoryId);
+    // rule.setTitle = title;
+    // rule.isArchived = isArchived;
     //   data.titleConditions.forEach((condition) => {
     //     const value = condition.value.toLowerCase();
     //     let queryCondition = '';
@@ -74,62 +150,115 @@ export class RulesRepository extends Repository<Rule> {
   }
 
   async getRules(user: User): Promise<Rule[]> {
-    console.log(user);
-    console.log(user.account);
-    const rules = await this.find({ account: user.accountId });
+    const rules = await this.find({
+      where: [{ account: user.accountId }, { account: null }],
+    });
     return rules;
   }
 
-  async runRules(user: User): Promise<Transaction[]> {
-    const rules = await this.find({ account: user.accountId });
-    const updatedTransactions = [];
-    for (const rule of rules) {
-      const filters = [];
-      rule.conditions.title.forEach((condition) => {
-        const value = condition.value.toLowerCase();
-        switch (condition.comparisonFunction) {
-          case StringComparisonFunctions.CONTAINS:
-            filters['description'] = Like(`%${value}%`);
-            break;
-          case StringComparisonFunctions.EQUAL:
-            filters['description'] = Like(`${value}`);
-            break;
-          case StringComparisonFunctions.START_WITH:
-            filters['description'] = Like(`%${value}`);
-            break;
-          case StringComparisonFunctions.END_WITH:
-            filters['description'] = Like(`${value}%`);
-            break;
-          default:
-            throw new Error(
-              `method ${condition.comparisonFunction} not supported yet`,
-            );
-        }
-      });
-      if (rule.transactionType) {
-        filters['type'] = rule.transactionType;
-      }
+  // async runRules(user: User): Promise<Transaction[]> {
+  //   const rules = await this.find({ account: user.accountId });
+  //   const updatedTransactions = [];
+  //   for (const rule of rules) {
+  //     const filters = [];
+  //     rule.conditions.title.forEach((condition) => {
+  //       const value = condition.value.toLowerCase();
+  //       switch (condition.comparisonFunction) {
+  //         case StringComparisonFunctions.CONTAINS:
+  //           filters['description'] = Like(`%${value}%`);
+  //           break;
+  //         case StringComparisonFunctions.EQUAL:
+  //           filters['description'] = Like(`${value}`);
+  //           break;
+  //         case StringComparisonFunctions.START_WITH:
+  //           filters['description'] = Like(`%${value}`);
+  //           break;
+  //         case StringComparisonFunctions.END_WITH:
+  //           filters['description'] = Like(`${value}%`);
+  //           break;
+  //         default:
+  //           throw new Error(
+  //             `method ${condition.comparisonFunction} not supported yet`,
+  //           );
+  //       }
+  //     });
+  //     if (rule.transactionType) {
+  //       filters['type'] = rule.transactionType;
+  //     }
+  //
+  //     let transactions = await getManager().find(Transaction, {
+  //       user,
+  //       ...filters,
+  //     });
+  //     console.log(rule);
+  //     transactions = transactions.map((transaction) => {
+  //       if (rule.category) {
+  //         transaction.category = rule.categoryId;
+  //       }
+  //       if (rule.isArchived) {
+  //         transaction.isArchived = rule.isArchived;
+  //       }
+  //       if (rule.setTitle) {
+  //         transaction.title = rule.setTitle;
+  //       }
+  //       return transaction;
+  //     });
+  //     // await getManager().save(Transaction, transactions);
+  //     updatedTransactions.push(...transactions);
+  //   }
+  //   return updatedTransactions;
+  // }
 
-      let transactions = await getManager().find(Transaction, {
-        user,
-        ...filters,
-      });
-      console.log(rule);
-      transactions = transactions.map((transaction) => {
-        if (rule.category) {
-          transaction.category = rule.categoryId;
-        }
-        if (rule.isArchived) {
-          transaction.isArchived = rule.isArchived;
-        }
-        if (rule.setTitle) {
-          transaction.title = rule.setTitle;
-        }
-        return transaction;
-      });
-      // await getManager().save(Transaction, transactions);
-      updatedTransactions.push(...transactions);
-    }
-    return updatedTransactions;
-  }
+  // async runRules(user: User): Promise<Transaction[]> {
+  //   const rules = await this.find({ account: user.accountId });
+  //   const updatedTransactions = [];
+  //   for (const rule of rules) {
+  //     const filters = [];
+  //     rule.conditions.title.forEach((condition) => {
+  //       const value = condition.value.toLowerCase();
+  //       switch (condition.comparisonFunction) {
+  //         case StringComparisonFunctions.CONTAINS:
+  //           filters['description'] = Like(`%${value}%`);
+  //           break;
+  //         case StringComparisonFunctions.EQUAL:
+  //           filters['description'] = Like(`${value}`);
+  //           break;
+  //         case StringComparisonFunctions.START_WITH:
+  //           filters['description'] = Like(`%${value}`);
+  //           break;
+  //         case StringComparisonFunctions.END_WITH:
+  //           filters['description'] = Like(`${value}%`);
+  //           break;
+  //         default:
+  //           throw new Error(
+  //             `method ${condition.comparisonFunction} not supported yet`,
+  //           );
+  //       }
+  //     });
+  //     if (rule.transactionType) {
+  //       filters['type'] = rule.transactionType;
+  //     }
+  //
+  //     let transactions = await getManager().find(Transaction, {
+  //       user,
+  //       ...filters,
+  //     });
+  //     console.log(rule);
+  //     transactions = transactions.map((transaction) => {
+  //       if (rule.category) {
+  //         transaction.category = rule.categoryId;
+  //       }
+  //       if (rule.isArchived) {
+  //         transaction.isArchived = rule.isArchived;
+  //       }
+  //       if (rule.setTitle) {
+  //         transaction.title = rule.setTitle;
+  //       }
+  //       return transaction;
+  //     });
+  //     // await getManager().save(Transaction, transactions);
+  //     updatedTransactions.push(...transactions);
+  //   }
+  //   return updatedTransactions;
+  // }
 }

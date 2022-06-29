@@ -12,6 +12,7 @@ import { Type } from './dto/enums';
 import { Source } from '../sources/sources.entity';
 import { Category } from '../categories/categories.entity';
 import { Account } from '../accounts/accounts.entity';
+import { Rule } from '../rules/rules.entity';
 
 @Entity()
 export class Transaction {
@@ -53,6 +54,8 @@ export class Transaction {
   user: User;
   @ManyToOne(() => Account, (account) => account.transactions)
   account: Account | number;
+  @ManyToOne(() => Rule, (rule) => rule.transactions, { eager: true })
+  rule: Rule;
   @CreateDateColumn()
   createdAt: Date;
 }

@@ -1,16 +1,12 @@
-import {
-  IsBoolean,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { StringComparisonFunctions } from './enum';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { NumberComparisonFunctions, StringComparisonFunctions } from './enum';
 
-export class StringRuleConditionDto {
+export class RuleConditionDto {
   @IsNotEmpty()
-  @IsEnum(StringComparisonFunctions)
-  comparisonFunction: StringComparisonFunctions;
+  @IsString()
+  field: string;
+  @IsNotEmpty()
+  comparisonFunction: StringComparisonFunctions | NumberComparisonFunctions;
   @IsNotEmpty()
   @IsString()
   value: string;

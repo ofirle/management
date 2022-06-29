@@ -8,7 +8,6 @@ import {
   TreeChildren,
   TreeParent,
 } from 'typeorm';
-import { Rule } from '../rules/rules.entity';
 import { Transaction } from '../transactions/transaction.entity';
 import { User } from '../auth/auth.entity';
 import { Account } from '../accounts/accounts.entity';
@@ -38,9 +37,6 @@ export class Category {
 
   @Column({ nullable: true })
   iconUrl: string;
-
-  @OneToMany(() => Rule, (rule) => rule.category)
-  rules: Rule[];
 
   @OneToMany(() => Transaction, (transaction) => transaction.category)
   transactions: Transaction[];

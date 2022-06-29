@@ -12,6 +12,7 @@ import { BankType, CreditCardType, SourceType } from '../sources/dto/enums';
 import { Type } from './dto/enums';
 import { CategoriesRepository } from '../categories/categories.repository';
 import { displayUserData } from '../shared/displayEntity';
+import { RulesRepository } from '../rules/rules.repository';
 
 @Injectable()
 export class TransactionsService {
@@ -20,6 +21,8 @@ export class TransactionsService {
     private transactionRepository: TransactionRepository,
     @InjectRepository(CategoriesRepository)
     private categoryRepository: CategoriesRepository,
+    @InjectRepository(RulesRepository)
+    private rulesRepository: RulesRepository,
   ) {}
 
   createTransaction(
@@ -34,6 +37,15 @@ export class TransactionsService {
       throw err;
     }
   }
+
+  // getTransactionByRule(ruleId: number, user: User): Promise<Transaction[]> {
+  //   try {
+  //     return this.transactionRepository.getTransactionByRule(ruleId, user);
+  //   } catch (err) {
+  //     console.log('HERE');
+  //     throw err;
+  //   }
+  // }
 
   //
   // async createSupplierType(
@@ -80,8 +92,16 @@ export class TransactionsService {
           filterDto.categories,
         );
     }
+    let ruleFilters = {};
+    if (filterDto.ruleId) {
+      ruleFilters = await this.rulesRepository.getRuleFilter(
+        Number(filterDto.ruleId),
+        user,
+      );
+    }
     let transactions = await this.transactionRepository.getTransactions(
       filterDto,
+      ruleFilters,
       user,
     );
     transactions = transactions.map((transaction) => {

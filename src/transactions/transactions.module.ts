@@ -7,17 +7,20 @@ import { AuthModule } from '../auth/auth.module';
 import { CategoriesService } from '../categories/categories.service';
 import { CategoriesRepository } from '../categories/categories.repository';
 import { AuthRepository } from '../auth/auth.repository';
+import { RulesRepository } from '../rules/rules.repository';
+import { RulesService } from '../rules/rules.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       TransactionRepository,
       CategoriesRepository,
+      RulesRepository,
       AuthRepository,
     ]),
     AuthModule,
   ],
   controllers: [TransactionsController],
-  providers: [TransactionsService, CategoriesService],
+  providers: [TransactionsService, RulesService, CategoriesService],
 })
 export class TransactionsModule {}

@@ -2,17 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
-  RelationId,
 } from 'typeorm';
-import { Category } from '../categories/categories.entity';
-import { Type } from '../transactions/dto/enums';
 import { User } from '../auth/auth.entity';
-import { Source } from '../sources/sources.entity';
 import { Account } from '../accounts/accounts.entity';
+import { Type } from '../transactions/dto/enums';
+import { Transaction } from '../transactions/transaction.entity';
 
 @Entity()
 export class Rule {
@@ -22,24 +19,10 @@ export class Rule {
   title: string;
   @Column({ type: 'json' })
   conditions;
-  @Column({ default: false })
-  isArchived: boolean;
+  @Column({ type: 'json' })
+  value;
   @Column({ nullable: true })
-  setTitle: string;
-  @Column({ nullable: true })
-  transactionType: Type;
-  @ManyToOne(() => Category, (category) => category.rules, {
-    nullable: true,
-  })
-  category: Category | number;
-
-  @RelationId((rule: Rule) => rule.category)
-  categoryId: number;
-  @ManyToMany(() => Source)
-  @JoinTable()
-  sources: Source[] | number[];
-  @RelationId((rule: Rule) => rule.category)
-  sourcesIds: number[];
+  type: Type;
   @CreateDateColumn()
   createdAt: Date;
   @ManyToOne(() => User, (user) => user.rules)
@@ -48,4 +31,8 @@ export class Rule {
     nullable: true,
   })
   account: Account | number;
+  @OneToMany(() => Transaction, (transaction) => transaction.rule, {
+    nullable: true,
+  })
+  transactions: Transaction[];
 }
