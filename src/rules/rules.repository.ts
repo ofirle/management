@@ -149,6 +149,11 @@ export class RulesRepository extends Repository<Rule> {
     return rule;
   }
 
+  async runRule(rule: Rule): Promise<Rule> {
+    console.log(rule);
+    return rule;
+  }
+
   async getRules(user: User): Promise<Rule[]> {
     const rules = await this.find({
       where: [{ account: user.accountId }, { account: null }],

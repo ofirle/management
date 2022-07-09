@@ -12,3 +12,8 @@ export enum BankType {
 export enum CreditCardType {
   ISRACARD = 'ISRACARD',
 }
+
+export enum Sources {
+  ISRACARD = 'ISRACARD',
+  OTSAR_AHAYAL = 'OTSAR_AHAYAL',
+}

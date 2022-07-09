@@ -36,5 +36,8 @@ export class GetTransactionsTypeFilter {
   archived: string[];
   @IsString()
   @IsOptional()
+  matchRuleId: string;
+  @IsString()
+  @IsOptional()
   ruleId: string;
 }

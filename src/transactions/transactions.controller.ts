@@ -10,7 +10,9 @@ import {
   Param,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TransactionsService } from './transactions.service';
@@ -24,6 +26,9 @@ import { ActionsEnum } from '../shared/enum';
 import { GetTransactionsTypeFilter } from './dto/get-transactions-type-filter.dto';
 import { AuthRepository } from '../auth/auth.repository';
 import { RulesService } from '../rules/rules.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('transactions')
 @UseGuards(AuthGuard())
@@ -116,15 +121,33 @@ export class TransactionsController {
   }
 
   @Post('/read_file')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          console.log(`${randomName}${extname(file.originalname)}`);
+          return cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   async importTransactions(
     @GetUser({ actions: ActionsEnum.ImportTransactions }) user: User,
     @Body() data: LoadFileDto,
+    @UploadedFile() file,
   ): Promise<any> {
     try {
+      console.log(file);
+      data.file = file.filename;
       const transactions =
         await this.transactionsService.insertTransactionsFromExcel(
           data.source,
-          data.file_name,
+          data.file,
           user,
         );
       return {

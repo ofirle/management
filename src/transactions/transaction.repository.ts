@@ -37,6 +37,7 @@ export class TransactionRepository extends Repository<Transaction> {
       description,
       title,
       usersId,
+      ruleId,
     } = filterParams;
     const findFilters = { ...ruleFilters };
     findFilters['account'] = Equal(user.accountId);
@@ -59,17 +60,21 @@ export class TransactionRepository extends Repository<Transaction> {
       findFilters['description'] = Like(`%${title}%`);
     }
 
-    if (amountMin || amountMax)
+    if (amountMin || amountMax) {
       findFilters['amount'] = this.getQueryFilterRange(amountMin, amountMax);
+    }
     if (types) {
       findFilters['type'] = In(types);
     }
     if (categories) {
       findFilters['category'] = In(categories);
     }
-
-    if (dateStart || dateEnd)
+    if (ruleId) {
+      findFilters['rule'] = Equal(ruleId);
+    }
+    if (dateStart || dateEnd) {
       findFilters['date'] = this.getQueryFilterRange(dateStart, dateEnd);
+    }
     return await this.find(findFilters);
   }
 

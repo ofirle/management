@@ -1,10 +1,9 @@
-import { IsDefined, IsString } from 'class-validator';
+import { IsDefined, IsEnum } from 'class-validator';
+import { Sources } from '../../sources/dto/enums';
 
 export class LoadFileDto {
   @IsDefined()
-  @IsString()
-  source?: string;
-  @IsDefined()
-  @IsString()
-  file_name?: string;
+  @IsEnum(Sources)
+  source: Sources;
+  file: any;
 }

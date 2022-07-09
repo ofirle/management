@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransactionRepository } from './transaction.repository';
 import { User } from '../auth/auth.entity';
@@ -93,9 +93,9 @@ export class TransactionsService {
         );
     }
     let ruleFilters = {};
-    if (filterDto.ruleId) {
+    if (filterDto.matchRuleId) {
       ruleFilters = await this.rulesRepository.getRuleFilter(
-        Number(filterDto.ruleId),
+        Number(filterDto.matchRuleId),
         user,
       );
     }
@@ -121,6 +121,21 @@ export class TransactionsService {
     });
   }
 
+  async resetTransactions(transactions: Transaction[]): Promise<Transaction[]> {
+    return await Promise.all(
+      transactions.map((transaction) => {
+        transaction = {
+          ...transaction,
+          title: transaction.description,
+          isArchived: false,
+          category: null,
+          rule: null,
+        };
+        return this.transactionRepository.save(transaction);
+      }),
+    );
+  }
+
   hashString = (string: string) => {
     let hash = 0,
       i,
@@ -135,13 +150,15 @@ export class TransactionsService {
   };
 
   insertTransactionsFromExcel = async (source, filename, userId) => {
+    const filePath = `${__dirname}\\..\\..\\uploads\\${filename}`;
+    const excelData = XLSX.readFile(filePath);
     let data = [];
     switch (source) {
       case BankType.OTSAR_AHAYAL:
-        data = await this.parseOtsarAhayal(filename);
+        data = await this.parseOtsarAhayal(excelData);
         break;
       case CreditCardType.ISRACARD:
-        data = await this.parseIsracard(filename);
+        data = await this.parseIsracard(excelData);
         break;
     }
     return await Promise.all(
@@ -151,8 +168,7 @@ export class TransactionsService {
     );
   };
 
-  parseOtsarAhayal = async (filename) => {
-    const excelData = XLSX.readFile(filename);
+  parseOtsarAhayal = async (excelData) => {
     const worksheet = excelData.Sheets[excelData.SheetNames[0]];
 
     let DataRowIndex = 3;
@@ -162,6 +178,11 @@ export class TransactionsService {
       typeKey: BankType.OTSAR_AHAYAL,
     });
     while (worksheet[`B${DataRowIndex}`]) {
+      console.log(worksheet[`D${DataRowIndex}`].v);
+      if (worksheet[`D${DataRowIndex}`].v === 'יתרת פתיחה') {
+        DataRowIndex += 1;
+        continue;
+      }
       const amount =
         worksheet[`F${DataRowIndex}`].v === ' '
           ? worksheet[`G${DataRowIndex}`].v
@@ -326,16 +347,17 @@ export class TransactionsService {
     return { data, index: index + 2 };
   };
 
-  parseIsracard = async (filename) => {
-    const excelData = XLSX.readFile(filename);
+  parseIsracard = async (excelData) => {
     const worksheet = excelData.Sheets[excelData.SheetNames[0]];
-
     let DataRowIndex = 4;
     const totalData = [];
     const source = await getManager().findOne(Source, {
       type: SourceType.CREDIT_CARD,
       typeKey: CreditCardType.ISRACARD,
     });
+    if (!source) {
+      throw new NotFoundException('source not found');
+    }
     //not include international actions
     try {
       while (
