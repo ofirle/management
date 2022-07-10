@@ -5,12 +5,15 @@ import { User } from '../auth/auth.entity';
 import { Rule } from './rules.entity';
 import { createRulesDto } from './dto/create-rules.dto';
 import { DeleteResult } from 'typeorm';
+import { TransactionRepository } from '../transactions/transaction.repository';
+import { GetTransactionsTypeFilter } from '../transactions/dto/get-transactions-type-filter.dto';
 
 @Injectable()
 export class RulesService {
   constructor(
     @InjectRepository(RulesRepository)
     private ruleRepository: RulesRepository,
+    private transactionRepository: TransactionRepository,
   ) {}
 
   async createRule(data: createRulesDto, user: User): Promise<Rule> {
@@ -23,7 +26,23 @@ export class RulesService {
 
   async runRule(ruleId: number, user: User): Promise<any> {
     const rule = await this.getRule(ruleId, user);
-    return this.ruleRepository.runRule(rule);
+    const filterDto = new GetTransactionsTypeFilter();
+    filterDto.ruleId = null;
+
+    // let ruleFilters = {};
+    // const filterDto = new
+    // if (filterDto.matchRuleId) {
+    const ruleFilters = await this.ruleRepository.getRuleFilter(ruleId, user);
+    // }
+    const transactions = await this.transactionRepository.getTransactions(
+      filterDto,
+      ruleFilters,
+      user,
+    );
+
+    const r = await this.ruleRepository.runRule(rule, transactions);
+    console.log(r);
+    return r;
   }
 
   async getRules(user: User): Promise<Rule[]> {

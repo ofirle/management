@@ -58,12 +58,12 @@ export class RulesController {
       `User "${user.username}", run rule id: ${id} from account ${user.accountId}`,
     );
     try {
-      const response = this.ruleService.runRule(Number(id), user);
+      const response = await this.ruleService.runRule(Number(id), user);
+      console.log(response);
       return {
         type: 1,
         data: {
-          transactions: [1, 2],
-          rule: response,
+          ...response,
         },
       };
     } catch (err) {

@@ -1,9 +1,10 @@
-import { EntityRepository, Like, Repository } from 'typeorm';
+import { EntityRepository, getManager, Like, Repository } from 'typeorm';
 import { Rule } from './rules.entity';
 import { User } from '../auth/auth.entity';
 import { createRulesDto } from './dto/create-rules.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { StringComparisonFunctions } from './dto/enum';
+import { Transaction } from '../transactions/transaction.entity';
 
 @EntityRepository(Rule)
 export class RulesRepository extends Repository<Rule> {
@@ -15,7 +16,7 @@ export class RulesRepository extends Repository<Rule> {
     }
     const filters = [];
     rule.conditions.title.forEach((condition) => {
-      const value = condition.value.toLowerCase();
+      const value = condition.value;
       switch (condition.comparisonFunction) {
         case StringComparisonFunctions.CONTAINS:
           filters['description'] = Like(`%${value}%`);
@@ -149,9 +150,21 @@ export class RulesRepository extends Repository<Rule> {
     return rule;
   }
 
-  async runRule(rule: Rule): Promise<Rule> {
-    console.log(rule);
-    return rule;
+  async runRule(rule: Rule, transactions: Transaction[]): Promise<any> {
+    const value = JSON.parse(rule.value);
+    await Promise.all(
+      transactions.map(async (transaction) => {
+        transaction = {
+          ...transaction,
+          title: value.title ?? transaction.title,
+          isArchived: value.isArchived ?? transaction.isArchived,
+          category: value.category ?? transaction.category,
+          rule: rule,
+        };
+        await getManager().getRepository(Transaction).save(transaction);
+      }),
+    );
+    return { rule, transactions };
   }
 
   async getRules(user: User): Promise<Rule[]> {

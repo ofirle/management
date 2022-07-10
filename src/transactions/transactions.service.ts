@@ -99,6 +99,7 @@ export class TransactionsService {
         user,
       );
     }
+    console.log(ruleFilters);
     let transactions = await this.transactionRepository.getTransactions(
       filterDto,
       ruleFilters,
